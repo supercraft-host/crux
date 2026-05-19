@@ -1,0 +1,26 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+.DS_Store
+__pycache__/
+.venv/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.tsbuildinfo
+
+# Unity-side noise (kept out of SDK repo)
+Library/
+Temp/
+Logs/
+UserSettings/
+
+# Godot
+.godot/
+
+# Editors
+.idea/
+.vscode/

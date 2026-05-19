@@ -1,93 +1,207 @@
-# game-server-backend
+# GSB SDKs
 
+> Open-source client SDKs for [GSB — Supercraft Game Services Backend](https://gsb.supercraft.host/).
+> One backend, four first-party SDKs, an [OpenAPI spec](openapi/v1.yaml) for the rest.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Getting started
+GSB is the hosted backend behind your game: player auth, persistent
+documents, seasonal leaderboards, economy, matchmaking, a server
+registry, and signed config delivery. See
+[**gsb.supercraft.host**](https://gsb.supercraft.host/) for the product,
+[`/pricing`](https://gsb.supercraft.host/pricing) for tiers,
+[`/cost-calculator`](https://gsb.supercraft.host/cost-calculator) for
+sizing, and the [SDK landing page](https://gsb.supercraft.host/sdk) for
+non-technical docs.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This repository ships the four first-party SDKs that bind every supported
+engine to the GSB HTTP API. All are MIT.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+---
 
-## Add your files
+## The four SDKs
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+| SDK | Status | Channel | Folder | README |
+|---|---|---|---|---|
+| **JavaScript / TypeScript** | stable | npm: [`@supercraft/gsb`](https://www.npmjs.com/package/@supercraft/gsb) | [`sdks/js/`](sdks/js/) | [`sdks/js/README.md`](sdks/js/README.md) |
+| **Godot 4** | stable | Godot Asset Library | [`sdks/godot/`](sdks/godot/) | [`sdks/godot/README.md`](sdks/godot/README.md) |
+| **Unity** | stable | UPM (Git URL) + Asset Store | [`sdks/unity/`](sdks/unity/) | [`sdks/unity/README.md`](sdks/unity/README.md) |
+| **Roblox (Luau)** | stable | Wally + Toolbox | [`sdks/roblox/`](sdks/roblox/) | [`sdks/roblox/README.md`](sdks/roblox/README.md) |
+
+Need a language we don't list? The [`openapi/v1.yaml`](openapi/v1.yaml)
+spec is the source of truth — generate a client with
+[openapi-generator](https://openapi-generator.tech/) and you're done.
+See [`docs/ARCHITECTURE.md#openapi-first`](docs/ARCHITECTURE.md#openapi-first).
+
+---
+
+## What each SDK covers
+
+| Feature | JS | Godot | Unity | Roblox |
+|---|---|---|---|---|
+| Anonymous + email auth | ✅ | ✅ | ✅ | ⚠️ Roblox-native |
+| JWT refresh / logout | ✅ | ✅ | ✅ | n/a |
+| Player Documents (versioned) | ✅ | ✅ | ✅ | ✅ (DataStore-compatible API) |
+| Document patch (JSON-Patch) | ❌ | ✅ | ✅ | ✅ |
+| Batch document read/write | ✅ | ✅ | ✅ | ❌ |
+| Seasonal Leaderboards | ✅ | ✅ | ✅ | ✅ |
+| Player Economy | ✅ | ✅ | ✅ | ✅ |
+| Matchmaking | ✅ | ✅ | ✅ | ✅ |
+| Server Registry | ✅ | ✅ | ✅ | n/a (Roblox JobId) |
+| Signed Config Delivery | ✅ | ✅ | ✅ | ✅ |
+
+`⚠️ Roblox-native` means we use [`HttpService:GetAsync`-based player
+verification](https://gsb.supercraft.host/blog/roblox-httpservice-external-backend)
+instead of email/password — Roblox already has its own identity layer.
+The "n/a" rows are intentional, not gaps; see each README's "Roblox
+differences" section for the why.
+
+---
+
+## Quick links into the product
+
+### Backend concepts (the same docs across every SDK)
+- [Cross-progression / cross-save patterns](https://gsb.supercraft.host/blog/cross-progression-and-cross-save-backend)
+- [Player data schema — NoSQL vs SQL](https://gsb.supercraft.host/blog/player-data-schema-design-nosql-vs-sql)
+- [Guest login and account upgrade](https://gsb.supercraft.host/blog/guest-login-and-account-upgrade)
+- [Skill-based matchmaking architecture](https://gsb.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
+- [Game server orchestration guide](https://gsb.supercraft.host/blog/game-server-orchestration-guide)
+- [Dedicated server hosting + backend, unified stack](https://gsb.supercraft.host/blog/dedicated-server-hosting-and-backend-unified-stack)
+- [Live-ops backend features compared](https://gsb.supercraft.host/blog/live-ops-backend-features-comparison)
+- [Game backend as a service — complete guide](https://gsb.supercraft.host/blog/game-backend-as-a-service-complete-guide)
+
+### Coming from somewhere else?
+- [Migrate from PlayFab](https://gsb.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb)
+- [Firebase for games — what to use instead](https://gsb.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026)
+- [Beamable vs Supercraft GSB](https://gsb.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison)
+- [AccelByte vs Supercraft GSB](https://gsb.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison)
+- [Nakama (open source) vs managed backend](https://gsb.supercraft.host/blog/nakama-open-source-vs-managed-backend)
+- [Colyseus vs managed backend](https://gsb.supercraft.host/blog/colyseus-vs-managed-backend)
+
+### Roblox-specific
+- [Roblox HttpService → external backend](https://gsb.supercraft.host/blog/roblox-httpservice-external-backend)
+- [Roblox DataStore vs external database](https://gsb.supercraft.host/blog/roblox-datastore-vs-external-database)
+- [Roblox cross-experience progression](https://gsb.supercraft.host/blog/roblox-cross-experience-progression)
+
+---
+
+## Repository layout
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/supercraft1/game-server-backend.git
-git branch -M main
-git push -uf origin main
+gsb-sdks/
+├── README.md             you are here
+├── RESEARCH.md           why these SDKs exist, OSS landscape, sources
+├── CHANGELOG.md          monorepo-level changes
+├── CONTRIBUTING.md       dev setup, PR rules, how to add a new language
+├── LICENSE               MIT
+├── docs/
+│   ├── ARCHITECTURE.md   how the SDKs are organized + OpenAPI-first story
+│   ├── AUTH.md           the three auth flows (api key / server token / player jwt)
+│   └── ERROR_HANDLING.md error model shared across SDKs
+├── openapi/
+│   └── v1.yaml           OpenAPI 3.0.3 spec — the source of truth
+├── sdks/
+│   ├── js/               TypeScript SDK (`@supercraft/gsb`)
+│   ├── godot/            Godot 4 GDScript addon
+│   ├── unity/            Unity UPM package (`host.supercraft.gsb`)
+│   └── roblox/           Roblox Luau module
+└── examples/
+    ├── js/leaderboard.ts
+    ├── godot/leaderboard.gd
+    ├── unity/Leaderboard.cs
+    └── roblox/leaderboard.lua
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://gitlab.com/supercraft1/game-server-backend/-/settings/integrations)
+## Quick start by stack
 
-## Collaborate with your team
+Five-minute integrations, in their natural form for each engine. Each
+points at the SDK's own README for the full surface.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Browser / Node.js — `@supercraft/gsb`
 
-## Test and Deploy
+```bash
+npm install @supercraft/gsb
+```
 
-Use the built-in continuous integration in GitLab.
+```ts
+import { GSBClient } from "@supercraft/gsb";
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+const gsb = GSBClient.forPlayer(
+  "https://gsb.supercraft.host",
+  "proj_xxx", "env_xxx", "gsb_apikey_xxx"
+);
+const auth = await gsb.loginAnonymous();
+await gsb.submitScore("weekly", auth.player_id, 9900);
+const top = await gsb.getTop("weekly", 10);
+```
+See [`sdks/js/README.md`](sdks/js/README.md).
 
-***
+### Godot 4 — drop-in addon
 
-# Editing this README
+```gdscript
+GSB.init_player("https://gsb.supercraft.host", "proj_xxx", "env_xxx", "gsb_apikey_xxx")
+var auth = await GSB.login_anonymous()
+await GSB.submit_score("weekly", auth.player_id, 9900.0)
+```
+See [`sdks/godot/README.md`](sdks/godot/README.md).
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Unity — UPM via Git URL
 
-## Suggestions for a good README
+```
+git+https://gitlab.com/supercraft1/game-server-backend.git?path=sdks/unity/Packages/host.supercraft.sdk
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```csharp
+var gsb = GSBClient.ForPlayer(
+    "https://gsb.supercraft.host", "proj_xxx", "env_xxx", "gsb_apikey_xxx");
+var auth = await gsb.LoginAnonymousAsync();
+await gsb.SubmitScoreAsync("weekly", auth.player_id, 9900);
+```
+See [`sdks/unity/README.md`](sdks/unity/README.md).
 
-## Name
-Choose a self-explaining name for your project.
+### Roblox — `require()` the module
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```lua
+local GSB = require(game.ServerScriptService.GSB)
+local gsb = GSB.init("proj_xxx", "gsb_servertoken_xxx", "env_xxx")
+gsb:SubmitScore("weekly", player.UserId, 9900)
+```
+See [`sdks/roblox/README.md`](sdks/roblox/README.md).
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+---
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## OpenAPI-first
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The HTTP wire format is documented in [`openapi/v1.yaml`](openapi/v1.yaml).
+Every first-party SDK in this repo is hand-written against that spec, but
+nothing stops you from autogenerating one for any language:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli \
+    generate -i /local/openapi/v1.yaml -g python -o /local/generated-python
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for why we hand-write
+the four first-party SDKs anyway (ergonomics) and when an autogenerated
+client is enough (CI scripts, dashboards, batch jobs).
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+PRs welcome inside the per-SDK scope. Cross-SDK refactors (renaming a
+method on all four at once) should land in a single MR. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Want to add a new language (Unreal, Rust, Python, Defold, Haxe, …)? Open
+an issue first so we can sketch the directory layout and CI plumbing.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+---
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+[MIT](LICENSE). Use these SDKs however you like, including in commercial
+games and in tools that talk to non-GSB backends. The OpenAPI spec is
+also MIT — autogenerated clients inherit the same terms.

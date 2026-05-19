@@ -1,0 +1,370 @@
+openapi: 3.0.3
+info:
+  title: GSB - Game Services Backend
+  description: |
+    GSB is a high-performance, multi-tenant backend-as-a-service for games.
+    It provides identity, persistent player data, seasonal leaderboards, matchmaking, economy, and social features.
+    
+    ## Authentication
+    - **Admin APIs**: Use `ApiKey <your_api_key>` in the `Authorization` header.
+    - **Runtime APIs (Server)**: Use `ServerToken <your_server_token>` in the `Authorization` header.
+    - **Runtime APIs (Player)**: Use `Bearer <jwt_token>` in the `Authorization` header.
+  version: 1.0.0
+  contact:
+    name: GSB Support
+    url: https://gsb.supercraft.host
+servers:
+  - url: https://gsb.supercraft.host/v1
+    description: Production API
+  - url: http://localhost:8080/v1
+    description: Local Development
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Use `ApiKey <key>`
+    ServerTokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Use `ServerToken <token>`
+    PlayerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: not_found
+        message:
+          type: string
+          example: "The requested resource was not found"
+        details:
+          type: object
+          additionalProperties: true
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Environment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+
+    Leaderboard:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sort_order:
+          type: string
+          enum: [asc, desc]
+        update_strategy:
+          type: string
+          enum: [replace, best, sum]
+        current_season:
+          type: integer
+        min_score:
+          type: number
+          nullable: true
+        max_score:
+          type: number
+          nullable: true
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        player_id:
+          type: string
+        score:
+          type: number
+        rank:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        updated_at:
+          type: string
+          format: date-time
+
+    Balance:
+      type: object
+      properties:
+        currency_key:
+          type: string
+        currency_name:
+          type: string
+        amount:
+          type: integer
+          format: int64
+        updated_at:
+          type: string
+          format: date-time
+
+    InventoryItem:
+      type: object
+      properties:
+        item_key:
+          type: string
+        item_name:
+          type: string
+        quantity:
+          type: integer
+        metadata:
+          type: object
+          additionalProperties: true
+        updated_at:
+          type: string
+          format: date-time
+
+paths:
+  /projects:
+    get:
+      summary: List Projects
+      tags: [Projects]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: A list of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+
+  /projects/{project_id}:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      summary: Get Project Details
+      tags: [Projects]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+    delete:
+      summary: Delete Project
+      tags: [Projects]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '204':
+          description: Project deleted
+
+  /projects/{project_id}/environments:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      summary: List Environments
+      tags: [Environments]
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: List of environments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Environment'
+
+  /projects/{project_id}/environments/{environment_id}/players/{player_id}/documents/{key}:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: environment_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: player_id
+        in: path
+        required: true
+        schema: { type: string }
+      - name: key
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get Player Document
+      tags: [Documents]
+      security:
+        - PlayerAuth: []
+        - ServerTokenAuth: []
+      responses:
+        '200':
+          description: Document content
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+    put:
+      summary: Set Player Document
+      tags: [Documents]
+      security:
+        - PlayerAuth: []
+        - ServerTokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '204':
+          description: Document saved
+
+  /projects/{project_id}/environments/{environment_id}/leaderboards/{leaderboard_id}/scores:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: environment_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: leaderboard_id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      summary: Submit Score
+      tags: [Leaderboards]
+      security:
+        - PlayerAuth: []
+        - ServerTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [player_id, score]
+              properties:
+                player_id: { type: string }
+                score: { type: number }
+                metadata: { type: object }
+      responses:
+        '200':
+          description: Score submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  standing:
+                    $ref: '#/components/schemas/LeaderboardEntry'
+                  accepted:
+                    type: boolean
+
+  /projects/{project_id}/environments/{environment_id}/players/{player_id}/economy:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: environment_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: player_id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get Player Economy
+      tags: [Economy]
+      security:
+        - PlayerAuth: []
+        - ServerTokenAuth: []
+      responses:
+        '200':
+          description: Player balances and inventory
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balances:
+                    type: array
+                    items: { $ref: '#/components/schemas/Balance' }
+                  inventory:
+                    type: array
+                    items: { $ref: '#/components/schemas/InventoryItem' }
+
+  /projects/{project_id}/environments/{environment_id}/players/{player_id}/social/friends:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: environment_id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: player_id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      summary: List Friends
+      tags: [Social]
+      security:
+        - PlayerAuth: []
+      responses:
+        '200':
+          description: List of friends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    friend_id: { type: string }
+                    status: { type: string, enum: [accepted] }

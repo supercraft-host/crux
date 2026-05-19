@@ -1,0 +1,134 @@
+# Supercraft GSB - Unity SDK
+
+Unity UPM package for [GSB (Game Services Backend)](https://supercraft.dev). Covers player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.
+
+## Installation
+
+Add to your project's `Packages/manifest.json`:
+
+```json
+{
+  "dependencies": {
+    "host.supercraft.gsb": "file:../../sdk-unity/Packages/host.supercraft.sdk"
+  }
+}
+```
+
+Or via **Package Manager → Add package from disk...** pointing at `host.supercraft.sdk/package.json`.
+
+## Quick start - game client
+
+```csharp
+using Supercraft.GSB;
+
+// 1. Create client with your project's public API key
+var gsb = GSBClient.ForPlayer(
+    baseUrl:       "https://gsb.supercraft.host",
+    projectId:     "proj_...",
+    environmentId: "env_...",
+    apiKey:        "gsb_apikey_..."
+);
+
+// 2. Log in (anonymous, email, or OAuth)
+var auth = await gsb.LoginAnonymousAsync();
+Debug.Log($"Player: {auth.player_id}");
+
+// 3. Save player data (arbitrary JSON)
+await gsb.SetPlayerDocumentAsync(auth.player_id, "profile", "{\"name\":\"Ada\",\"level\":5}");
+
+// 4. Submit a leaderboard score
+await gsb.SubmitScoreAsync("global-score", auth.player_id, 1234);
+
+// 5. Get top 10
+var top = await gsb.GetTopAsync("global-score", 10);
+foreach (var e in top)
+    Debug.Log($"#{e.rank} {e.player_id}: {e.score}");
+```
+
+## Quick start - dedicated game server
+
+```csharp
+using Supercraft.GSB;
+
+var gsb = GSBClient.ForServer(
+    baseUrl:       "https://gsb.supercraft.host",
+    projectId:     "proj_...",
+    environmentId: "env_...",
+    serverToken:   "gsb_servertoken_..."
+);
+
+// Register this server instance
+var server = await gsb.RegisterServerAsync(new ServerRegistration
+{
+    server_id    = "my-server-01",
+    name         = "Deathmatch EU #1",
+    region       = "eu-west",
+    map_name     = "de_dust2",
+    game_mode    = "deathmatch",
+    player_count = 0,
+    max_players  = 16,
+    address      = "198.51.100.1",
+    port         = 27015,
+});
+
+// Heartbeat loop (call every 30s)
+await gsb.HeartbeatAsync(server.server_id);
+
+// Read a player document server-authoritatively
+var doc = await gsb.GetPlayerDocumentAsync("player-uuid", "inventory");
+Debug.Log(doc.raw_value); // raw JSON string
+```
+
+## API reference
+
+### Auth
+| Method | Description |
+|--------|-------------|
+| `LoginAnonymousAsync()` | Guest login (no credentials) |
+| `LoginEmailAsync(email, password)` | Email + password login |
+| `RegisterEmailAsync(email, password)` | Email + password registration |
+| `RefreshTokenAsync()` | Refresh the player access token |
+| `LogoutAsync()` | Revoke the current session |
+
+### Player Documents
+| Method | Description |
+|--------|-------------|
+| `GetPlayerDocumentAsync(playerId, key)` | Get a JSON document by key |
+| `SetPlayerDocumentAsync(playerId, key, valueJson, version?)` | Write a JSON document |
+| `DeletePlayerDocumentAsync(playerId, key)` | Delete a document |
+| `BatchGetPlayerDocumentsAsync(playerId, keys[])` | Fetch multiple keys in one call |
+| `BatchWritePlayerDocumentsAsync(playerId, writes[])` | Write multiple keys atomically |
+
+### Leaderboards
+| Method | Description |
+|--------|-------------|
+| `SubmitScoreAsync(leaderboardId, playerId, score, metadata?)` | Submit a score |
+| `GetTopAsync(leaderboardId, limit)` | Get top N entries |
+| `GetPlayerStandingAsync(leaderboardId, playerId)` | Get rank + score for a player |
+| `GetAroundPlayerAsync(leaderboardId, playerId, radius)` | Get neighbours in the ranking |
+
+### Economy
+| Method | Description |
+|--------|-------------|
+| `GetPlayerEconomyAsync(playerId)` | Get balances + inventory |
+| `AdjustEconomyAsync(playerId, balances?, inventory?)` | Atomic credit/deduct |
+
+### Matchmaking
+| Method | Description |
+|--------|-------------|
+| `JoinMatchmakingAsync(playerId, gameMode, region)` | Join a matchmaking queue |
+| `GetMatchmakingStatusAsync()` | Poll for match result |
+| `LeaveMatchmakingAsync(playerId)` | Leave the queue |
+
+### Server Registry *(server token required)*
+| Method | Description |
+|--------|-------------|
+| `RegisterServerAsync(ServerRegistration)` | Register this server instance |
+| `HeartbeatAsync(serverId)` | Send a keepalive heartbeat |
+| `DeregisterServerAsync(serverId)` | Remove from registry on shutdown |
+| `ListServersAsync(region?, mapName?, gameMode?)` | Browse available servers |
+
+### Config
+| Method | Description |
+|--------|-------------|
+| `DownloadActiveConfigBundleAsync()` | Download the active config bundle as `byte[]` |

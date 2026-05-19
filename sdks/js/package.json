@@ -1,0 +1,48 @@
+{
+  "name": "@supercraft/gsb",
+  "version": "1.0.0",
+  "description": "Supercraft Game Services Backend SDK - player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev":   "tsc --watch",
+    "test":  "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx --env-file=smoke/.env.local smoke/run.ts"
+  },
+  "devDependencies": {
+    "tsx":        "^4.19.0",
+    "typescript": "^5.4.0",
+    "vitest":     "^2.0.0"
+  },
+  "keywords": [
+    "game-backend",
+    "gsb",
+    "supercraft",
+    "leaderboard",
+    "matchmaking",
+    "economy"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/supercraft1/game-server-backend",
+    "directory": "sdks/js"
+  },
+  "homepage": "https://gsb.supercraft.host",
+  "bugs": "https://gitlab.com/supercraft1/game-server-backend/-/issues"
+}

@@ -1,0 +1,53 @@
+stages: [lint, test]
+
+# JS SDK — npm install + vitest, matrix over Node versions.
+.js-base: &js-base
+  before_script:
+    - cd sdks/js
+    - npm ci || npm install
+  cache:
+    key:
+      files: [sdks/js/package-lock.json, sdks/js/package.json]
+    paths: [sdks/js/node_modules/]
+
+js-test-node18:
+  stage: test
+  image: node:18-alpine
+  <<: *js-base
+  script:
+    - npm test
+
+js-test-node20:
+  stage: test
+  image: node:20-alpine
+  <<: *js-base
+  script:
+    - npm test
+
+js-test-node22:
+  stage: test
+  image: node:22-alpine
+  <<: *js-base
+  script:
+    - npm test
+
+js-build:
+  stage: test
+  image: node:20-alpine
+  <<: *js-base
+  script:
+    - npm run build
+  artifacts:
+    paths: [sdks/js/dist/]
+    expire_in: 1 day
+
+# OpenAPI lint — make sure the spec parses and is internally consistent.
+openapi-lint:
+  stage: lint
+  image: stoplight/spectral:latest
+  script:
+    - spectral lint openapi/v1.yaml || true   # warn-only until we tune rulesets
+  allow_failure: true
+
+# Godot / Unity / Roblox — no headless CI today; manual smoke-tests against
+# a local GSB. Keep README "Tested via" instructions accurate when changing.
