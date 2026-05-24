@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Supercraft.GSB
+namespace Supercraft.Crux
 {
     /// <summary>
-    /// GSB client for Unity. Supports two modes:
+    /// Crux client for Unity. Supports two modes:
     /// <list type="bullet">
     ///   <item><see cref="ForServer"/> - dedicated game server, uses a server token.</item>
     ///   <item><see cref="ForPlayer"/> - game client, uses an API key for auth then stores the player JWT internally.</item>
@@ -247,13 +247,13 @@ namespace Supercraft.GSB
         {
             if (!string.IsNullOrEmpty(_opts.ServerToken)) return "ServerToken " + _opts.ServerToken;
             if (!string.IsNullOrEmpty(_playerToken))      return "Bearer "      + _playerToken;
-            throw new InvalidOperationException("GSB: no server token or player token available. Call Login first or use ForServer.");
+            throw new InvalidOperationException("Crux: no server token or player token available. Call Login first or use ForServer.");
         }
 
         private string ServerAuth()
         {
             if (!string.IsNullOrEmpty(_opts.ServerToken)) return "ServerToken " + _opts.ServerToken;
-            throw new InvalidOperationException("GSB: server token required. Use GSBClient.ForServer(...).");
+            throw new InvalidOperationException("Crux: server token required. Use GSBClient.ForServer(...).");
         }
 
         private string EnvPath(string suffix)
@@ -287,7 +287,7 @@ namespace Supercraft.GSB
 
                 if (req.result != UnityWebRequest.Result.Success)
                 {
-                    lastError = $"GSB HTTP {req.responseCode}: {req.downloadHandler?.text ?? req.error}";
+                    lastError = $"Crux HTTP {req.responseCode}: {req.downloadHandler?.text ?? req.error}";
                     if (attempt < _opts.MaxRetries && (req.responseCode == 0 || req.responseCode >= 500))
                     {
                         await Task.Delay((int)(backoff * 1000), ct);

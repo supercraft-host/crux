@@ -1,5 +1,5 @@
 --[[
-    GSB (Game Services Backend) Roblox SDK
+    Crux (Game Services Backend) Roblox SDK
     Version: 2.0.0
 
     Drop-in replacement for DataStoreService, OrderedDataStore, and more.
@@ -10,12 +10,12 @@
     - Automatic retry with exponential back-off on 429 / 503
 
     Usage (Server Script):
-        local GSB = require(game.ServerScriptService.GSB)
-        local gsb = GSB.init("YOUR_PROJECT_ID", "YOUR_SERVER_TOKEN", "YOUR_ENV_ID")
+        local Crux = require(game.ServerScriptService.Crux)
+        local gsb = Crux.init("YOUR_PROJECT_ID", "YOUR_SERVER_TOKEN", "YOUR_ENV_ID")
 ]]
 
-local GSB = {}
-GSB.__index = GSB
+local Crux = {}
+Crux.__index = Crux
 
 local HttpService = game:GetService("HttpService")
 local BASE_URL = "https://api.gsb.dev/v1"
@@ -31,7 +31,7 @@ local BASE_BACKOFF_SECONDS = 1  -- doubles each attempt
 -- Request performs an HTTP call with automatic retry on transient errors.
 -- Retries on: 429 (rate limited, respects Retry-After), 503 (unavailable).
 -- Errors immediately on 4xx (except 429) and unexpected failures.
-function GSB:Request(method, endpoint, body)
+function Crux:Request(method, endpoint, body)
     local url = BASE_URL .. endpoint
     local headers = {
         ["Authorization"] = "ServerToken " .. self.SecretToken,
@@ -54,7 +54,7 @@ function GSB:Request(method, endpoint, body)
 
         if not ok then
             -- Network-level failure (no response)
-            lastError = "[GSB] Network error: " .. tostring(response)
+            lastError = "[Crux] Network error: " .. tostring(response)
             if attempt <= MAX_RETRIES then
                 task.wait(backoff)
                 backoff = backoff * 2
@@ -77,26 +77,26 @@ function GSB:Request(method, endpoint, body)
             ) or backoff
             task.wait(retryAfter)
             backoff = backoff * 2
-            lastError = "[GSB] Retrying after " .. retryAfter .. "s (status " .. status .. ")"
+            lastError = "[Crux] Retrying after " .. retryAfter .. "s (status " .. status .. ")"
             continue
         end
 
         if not response.Success then
             local msg = (data and data.message) or response.StatusMessage or "Unknown Error"
-            error("[GSB] API Error (" .. status .. "): " .. msg, 2)
+            error("[Crux] API Error (" .. status .. "): " .. msg, 2)
         end
 
         return data, response
     end
 
-    error(lastError or "[GSB] Max retries exceeded", 2)
+    error(lastError or "[Crux] Max retries exceeded", 2)
 end
 
 ------------------------------------------------------------------------
 -- Constructor
 ------------------------------------------------------------------------
 
-function GSB.init(projectID, secretToken, environmentID)
+function Crux.init(projectID, secretToken, environmentID)
     assert(type(projectID)     == "string" and #projectID     > 0, "projectID required")
     assert(type(secretToken)   == "string" and #secretToken   > 0, "secretToken required")
     assert(type(environmentID) == "string" and #environmentID > 0, "environmentID required")
@@ -105,7 +105,7 @@ function GSB.init(projectID, secretToken, environmentID)
         ProjectID     = projectID,
         SecretToken   = secretToken,
         EnvironmentID = environmentID,
-    }, GSB)
+    }, Crux)
 end
 
 ------------------------------------------------------------------------
@@ -122,7 +122,7 @@ end
 local DataStore = {}
 DataStore.__index = DataStore
 
-function GSB:GetDataStore(name)
+function Crux:GetDataStore(name)
     assert(type(name) == "string" and #name > 0, "DataStore name required")
     return setmetatable({ _gsb = self, _name = name }, DataStore)
 end
@@ -181,7 +181,7 @@ function DataStore:UpdateAsync(playerID, transformFn)
             error(result, 2)
         end
     end
-    error("[GSB] UpdateAsync: too many version conflicts", 2)
+    error("[Crux] UpdateAsync: too many version conflicts", 2)
 end
 
 -- IncrementAsync adds delta to a numeric value atomically.
@@ -206,8 +206,8 @@ end
 ------------------------------------------------------------------------
 
 -- VerifyPlayer validates a Roblox UserId against the backend.
--- Returns the GSB player record (creates one if new).
-function GSB:VerifyPlayer(robloxUserID)
+-- Returns the Crux player record (creates one if new).
+function Crux:VerifyPlayer(robloxUserID)
     local endpoint = string.format(
         "/projects/%s/environments/%s/auth/roblox/verify",
         self.ProjectID, self.EnvironmentID
@@ -220,7 +220,7 @@ end
 ------------------------------------------------------------------------
 
 -- SubmitScore records a score for a player on a named leaderboard.
-function GSB:SubmitScore(leaderboardID, playerID, score, metadata)
+function Crux:SubmitScore(leaderboardID, playerID, score, metadata)
     local endpoint = string.format(
         "/projects/%s/environments/%s/leaderboards/%s/scores",
         self.ProjectID, self.EnvironmentID, leaderboardID
@@ -234,7 +234,7 @@ end
 
 -- GetLeaderboardTop returns the top N entries.
 -- limit defaults to 10. Returns array of {player_id, score, rank}.
-function GSB:GetLeaderboardTop(leaderboardID, limit)
+function Crux:GetLeaderboardTop(leaderboardID, limit)
     limit = limit or 10
     local endpoint = string.format(
         "/projects/%s/environments/%s/leaderboards/%s/top?limit=%d",
@@ -244,7 +244,7 @@ function GSB:GetLeaderboardTop(leaderboardID, limit)
 end
 
 -- GetPlayerStanding returns rank and score for a specific player.
-function GSB:GetPlayerStanding(leaderboardID, playerID)
+function Crux:GetPlayerStanding(leaderboardID, playerID)
     local endpoint = string.format(
         "/projects/%s/environments/%s/leaderboards/%s/players/%s",
         self.ProjectID, self.EnvironmentID, leaderboardID, tostring(playerID)
@@ -258,7 +258,7 @@ function GSB:GetPlayerStanding(leaderboardID, playerID)
 end
 
 -- GetPlayersAroundPlayer returns entries within radius positions of a player.
-function GSB:GetPlayersAroundPlayer(leaderboardID, playerID, radius)
+function Crux:GetPlayersAroundPlayer(leaderboardID, playerID, radius)
     radius = radius or 3
     local endpoint = string.format(
         "/projects/%s/environments/%s/leaderboards/%s/players/%s/around?radius=%d",
@@ -271,7 +271,7 @@ end
 -- Economy
 ------------------------------------------------------------------------
 
-function GSB:GetPlayerEconomy(playerID)
+function Crux:GetPlayerEconomy(playerID)
     local endpoint = string.format(
         "/projects/%s/environments/%s/players/%s/economy",
         self.ProjectID, self.EnvironmentID, tostring(playerID)
@@ -279,7 +279,7 @@ function GSB:GetPlayerEconomy(playerID)
     return self:Request("GET", endpoint)
 end
 
-function GSB:AdjustEconomy(playerID, balanceAdjustments, inventoryAdjustments)
+function Crux:AdjustEconomy(playerID, balanceAdjustments, inventoryAdjustments)
     local endpoint = string.format(
         "/projects/%s/environments/%s/players/%s/economy/adjust",
         self.ProjectID, self.EnvironmentID, tostring(playerID)
@@ -294,7 +294,7 @@ end
 -- Matchmaking
 ------------------------------------------------------------------------
 
-function GSB:JoinMatchmaking(playerID, gameMode, region, metadata)
+function Crux:JoinMatchmaking(playerID, gameMode, region, metadata)
     local endpoint = string.format(
         "/projects/%s/environments/%s/matchmaking/join",
         self.ProjectID, self.EnvironmentID
@@ -307,7 +307,7 @@ function GSB:JoinMatchmaking(playerID, gameMode, region, metadata)
     })
 end
 
-function GSB:GetMatchStatus(playerID)
+function Crux:GetMatchStatus(playerID)
     local endpoint = string.format(
         "/projects/%s/environments/%s/matchmaking/status/%s",
         self.ProjectID, self.EnvironmentID, tostring(playerID)
@@ -315,7 +315,7 @@ function GSB:GetMatchStatus(playerID)
     return self:Request("GET", endpoint)
 end
 
-function GSB:LeaveMatchmaking(playerID)
+function Crux:LeaveMatchmaking(playerID)
     local endpoint = string.format(
         "/projects/%s/environments/%s/matchmaking/leave",
         self.ProjectID, self.EnvironmentID
@@ -327,7 +327,7 @@ end
 -- Server registry
 ------------------------------------------------------------------------
 
-function GSB:GetServers(filters)
+function Crux:GetServers(filters)
     filters = filters or {}
     local endpoint = string.format(
         "/projects/%s/environments/%s/browser",
@@ -349,7 +349,7 @@ end
 
 -- GetActiveConfig downloads the active config bundle for this environment.
 -- Returns the raw bundle content as a string.
-function GSB:GetActiveConfig()
+function Crux:GetActiveConfig()
     local endpoint = string.format(
         "/projects/%s/environments/%s/config/active/download",
         self.ProjectID, self.EnvironmentID
@@ -358,4 +358,4 @@ function GSB:GetActiveConfig()
     return response and response.Body
 end
 
-return GSB
+return Crux

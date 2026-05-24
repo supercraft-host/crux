@@ -1,6 +1,6 @@
 [package]
 name = "supercraft/gsb"
-description = "Supercraft GSB Roblox SDK — player documents, leaderboards, economy, matchmaking, cross-experience progression."
+description = "Crux Roblox SDK - player documents, leaderboards, economy, matchmaking, cross-experience progression."
 version = "1.0.0"
 license = "MIT"
 realm = "shared"

@@ -1,7 +1,7 @@
 {
   "name": "@supercraft/gsb",
   "version": "1.0.0",
-  "description": "Supercraft Game Services Backend SDK - player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
+  "description": "Crux SDK - player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,9 +40,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/supercraft1/game-server-backend",
+    "url": "https://gitlab.com/supercraft1/crux",
     "directory": "sdks/js"
   },
-  "homepage": "https://gsb.supercraft.host",
-  "bugs": "https://gitlab.com/supercraft1/game-server-backend/-/issues"
+  "homepage": "https://crux.supercraft.host",
+  "bugs": "https://gitlab.com/supercraft1/crux/-/issues"
 }

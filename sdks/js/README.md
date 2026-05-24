@@ -1,6 +1,6 @@
-# `@supercraft/gsb` — JavaScript / TypeScript SDK
+# `@supercraft/gsb` - JavaScript / TypeScript SDK
 
-> Fetch-based client for [GSB — Supercraft Game Services Backend](https://gsb.supercraft.host/).
+> Fetch-based client for [Crux - Crux](https://crux.supercraft.host/).
 > Works in Node.js 18+, browsers, Deno, Bun, Cloudflare Workers, and any
 > runtime with native `fetch`.
 
@@ -17,16 +17,16 @@ npm install @supercraft/gsb
 # or: yarn add @supercraft/gsb
 ```
 
-No native dependencies. ESM-only — if you're stuck on CommonJS, use a
+No native dependencies. ESM-only - if you're stuck on CommonJS, use a
 dynamic `import()`.
 
-## Quick start — game client
+## Quick start - game client
 
 ```ts
 import { GSBClient } from "@supercraft/gsb";
 
 const gsb = GSBClient.forPlayer(
-  "https://gsb.supercraft.host",
+  "https://crux.supercraft.host",
   "proj_xxx",
   "env_xxx",
   "gsb_apikey_xxx"
@@ -46,13 +46,13 @@ const top = await gsb.getTop("weekly", 10);
 top.forEach(e => console.log(`#${e.rank}  ${e.player_id}  ${e.score}`));
 ```
 
-## Quick start — dedicated server / your backend
+## Quick start - dedicated server / your backend
 
 ```ts
 import { GSBClient } from "@supercraft/gsb";
 
 const gsb = GSBClient.forServer(
-  "https://gsb.supercraft.host",
+  "https://crux.supercraft.host",
   "proj_xxx",
   "env_xxx",
   "gsb_servertoken_xxx"
@@ -93,7 +93,7 @@ process.on("SIGTERM", async () => {
 | `GSBClient.forPlayer(url, projectId, envId, apiKey)` | Client-side (game client) |
 | `GSBClient.forServer(url, projectId, envId, serverToken)` | Server-side (dedicated game server, your backend) |
 
-### Auth — [concepts](https://gsb.supercraft.host/blog/guest-login-and-account-upgrade)
+### Auth - [concepts](https://crux.supercraft.host/blog/guest-login-and-account-upgrade)
 
 | Method | Returns | Description |
 |---|---|---|
@@ -103,7 +103,7 @@ process.on("SIGTERM", async () => {
 | `refreshAccessToken()` | `AuthResult` | Refresh access token (called automatically by the SDK before expiry) |
 | `logout()` | `void` | Revoke the current session |
 
-### Player Documents — [concepts](https://gsb.supercraft.host/blog/cross-progression-and-cross-save-backend)
+### Player Documents - [concepts](https://crux.supercraft.host/blog/cross-progression-and-cross-save-backend)
 
 | Method | Description |
 |---|---|
@@ -113,10 +113,10 @@ process.on("SIGTERM", async () => {
 | `batchGetPlayerDocuments<T>(playerId, keys[])` | Fetch multiple keys in one call |
 | `batchWritePlayerDocuments<T>(playerId, writes[])` | Write multiple keys atomically |
 
-See [Player data schema — NoSQL vs SQL on gsb.supercraft.host](https://gsb.supercraft.host/blog/player-data-schema-design-nosql-vs-sql)
+See [Player data schema - NoSQL vs SQL on crux.supercraft.host](https://crux.supercraft.host/blog/player-data-schema-design-nosql-vs-sql)
 for design guidance on what to keep in documents vs. dedicated tables.
 
-### Leaderboards — [concepts](https://gsb.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
+### Leaderboards - [concepts](https://crux.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
 
 | Method | Description |
 |---|---|
@@ -125,14 +125,14 @@ for design guidance on what to keep in documents vs. dedicated tables.
 | `getPlayerStanding(leaderboardId, playerId)` | Player's rank + score (or `null`) |
 | `getAroundPlayer(leaderboardId, playerId, radius)` | Neighbours in the ranking |
 
-### Economy — [live-ops patterns](https://gsb.supercraft.host/blog/live-ops-backend-features-comparison)
+### Economy - [live-ops patterns](https://crux.supercraft.host/blog/live-ops-backend-features-comparison)
 
 | Method | Description |
 |---|---|
 | `getPlayerEconomy(playerId)` | Balances + inventory |
 | `adjustEconomy(playerId, balances?, inventory?)` | Atomic credit / deduct on the server |
 
-### Matchmaking — [architecture](https://gsb.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
+### Matchmaking - [architecture](https://crux.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
 
 | Method | Description |
 |---|---|
@@ -140,7 +140,7 @@ for design guidance on what to keep in documents vs. dedicated tables.
 | `getMatchmakingStatus()` | Poll for match result |
 | `leaveMatchmaking(playerId)` | Leave the queue |
 
-### Server Registry — [orchestration guide](https://gsb.supercraft.host/blog/game-server-orchestration-guide)
+### Server Registry - [orchestration guide](https://crux.supercraft.host/blog/game-server-orchestration-guide)
 
 *Requires a server token (`forServer`).*
 
@@ -155,7 +155,7 @@ for design guidance on what to keep in documents vs. dedicated tables.
 
 | Method | Description |
 |---|---|
-| `downloadActiveConfigBundle()` | Returns `Promise<ArrayBuffer>` — your signed config blob |
+| `downloadActiveConfigBundle()` | Returns `Promise<ArrayBuffer>` - your signed config blob |
 
 ---
 
@@ -171,9 +171,9 @@ try {
 } catch (e) {
   if (e instanceof GSBError) {
     if (e.statusCode === 404) {
-      // First write — there is no document yet.
+      // First write - there is no document yet.
     } else if (e.statusCode === 409) {
-      // Optimistic-concurrency conflict — re-read and retry.
+      // Optimistic-concurrency conflict - re-read and retry.
     } else {
       console.error(`HTTP ${e.statusCode}: ${e.message}`);
     }
@@ -181,7 +181,7 @@ try {
 }
 ```
 
-The SDK already retries on `429` and `503` with exponential backoff —
+The SDK already retries on `429` and `503` with exponential backoff -
 don't wrap calls in your own retry loops. See
 [`docs/ERROR_HANDLING.md`](../../docs/ERROR_HANDLING.md).
 
@@ -222,7 +222,7 @@ const doc = await gsb.getPlayerDocument<PlayerSave>(playerId, "save");
 
 ## Examples
 
-- [`examples/js/leaderboard.ts`](../../examples/js/leaderboard.ts) —
+- [`examples/js/leaderboard.ts`](../../examples/js/leaderboard.ts) -
   weekly leaderboard wired end-to-end (init → login → submit → fetch).
 
 ---
@@ -232,35 +232,35 @@ const doc = await gsb.getPlayerDocument<PlayerSave>(playerId, "save");
 **Why ESM-only?**  Every supported runtime has native ESM as of 2023.
 CommonJS adds dual-publish complexity for no real benefit.
 
-**Does it bundle any HTTP library?**  No — just `fetch`. The wheel
+**Does it bundle any HTTP library?**  No - just `fetch`. The wheel
 file is a few KB.
 
 **Can I use it from a service worker?**  Yes, but the worker needs the
-right `fetch` permissions for `https://gsb.supercraft.host`.
+right `fetch` permissions for `https://crux.supercraft.host`.
 
 **Why not just generate the SDK from the OpenAPI spec?**  See
 [`docs/ARCHITECTURE.md#openapi-first`](../../docs/ARCHITECTURE.md#openapi-first).
 TL;DR: ergonomics. If you need a generated client (e.g. for a Python
-data pipeline), use the spec — it's the source of truth.
+data pipeline), use the spec - it's the source of truth.
 
 ---
 
 ## Don't want to host a backend?
 
-You don't have to. [**gsb.supercraft.host**](https://gsb.supercraft.host/)
-runs GSB so you don't have to operate it. Pricing at
-[/pricing](https://gsb.supercraft.host/pricing), cost calculator at
-[/cost-calculator](https://gsb.supercraft.host/cost-calculator),
+You don't have to. [**crux.supercraft.host**](https://crux.supercraft.host/)
+runs Crux so you don't have to operate it. Pricing at
+[/pricing](https://crux.supercraft.host/pricing), cost calculator at
+[/cost-calculator](https://crux.supercraft.host/cost-calculator),
 migration guides:
 
-- [from PlayFab](https://gsb.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb)
-- [from Firebase](https://gsb.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026)
-- [vs Beamable](https://gsb.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison)
-- [vs AccelByte](https://gsb.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison)
-- [vs Nakama (self-hosted)](https://gsb.supercraft.host/blog/nakama-open-source-vs-managed-backend)
+- [from PlayFab](https://crux.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb)
+- [from Firebase](https://crux.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026)
+- [vs Beamable](https://crux.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison)
+- [vs AccelByte](https://crux.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison)
+- [vs Nakama (self-hosted)](https://crux.supercraft.host/blog/nakama-open-source-vs-managed-backend)
 
-This SDK is MIT — use it against your own backend if you'd rather. The
-GSB HTTP contract is fully documented in [`openapi/v1.yaml`](../../openapi/v1.yaml).
+This SDK is MIT - use it against your own backend if you'd rather. The
+Crux HTTP contract is fully documented in [`openapi/v1.yaml`](../../openapi/v1.yaml).
 
 ## License
 

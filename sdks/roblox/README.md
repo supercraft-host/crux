@@ -1,7 +1,7 @@
-# Supercraft GSB — Roblox SDK
+# Crux - Roblox SDK
 
-> Luau module for [GSB — Supercraft Game Services Backend](https://gsb.supercraft.host/).
-> Server-side only — runs inside a Roblox experience's `ServerScriptService`.
+> Luau module for [Crux - Crux](https://crux.supercraft.host/).
+> Server-side only - runs inside a Roblox experience's `ServerScriptService`.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -15,14 +15,14 @@ In your project's `wally.toml`:
 
 ```toml
 [dependencies]
-GSB = "supercraft/gsb@1.0.0"
+Crux = "supercraft/gsb@1.0.0"
 ```
 
 Then `wally install`.
 
 ### Manual
 
-Drag [`GSB.lua`](GSB.lua) into `ServerScriptService`. That's it.
+Drag [`Crux.lua`](Crux.lua) into `ServerScriptService`. That's it.
 
 ### Rojo
 
@@ -30,7 +30,7 @@ Add to your `default.project.json`:
 
 ```json
 "ServerScriptService": {
-  "GSB": { "$path": "src/GSB.lua" }
+  "Crux": { "$path": "src/Crux.lua" }
 }
 ```
 
@@ -39,10 +39,10 @@ Add to your `default.project.json`:
 ## Quick start
 
 ```lua
-local GSB = require(game.ServerScriptService.GSB)
+local Crux = require(game.ServerScriptService.Crux)
 
 -- Initialise once at server start. Use a server token only.
-local gsb = GSB.init(
+local gsb = Crux.init(
     "proj_xxx",                     -- project ID
     "gsb_servertoken_xxx",          -- server token
     "env_xxx"                       -- environment ID
@@ -69,7 +69,7 @@ end
 
 ## Why the Roblox SDK looks different
 
-The other GSB SDKs (JS / Godot / Unity) ship two modes: **client** and
+The other Crux SDKs (JS / Godot / Unity) ship two modes: **client** and
 **server**. Roblox doesn't work that way:
 
 - Roblox already has its own identity layer (every player has a
@@ -82,9 +82,9 @@ The other GSB SDKs (JS / Godot / Unity) ship two modes: **client** and
 So the Roblox SDK runs server-side with a server token, identifies
 players by their Roblox `UserId`, and presents a familiar
 DataStoreService-shaped API where it makes sense. See
-[Roblox HttpService → external backend on gsb.supercraft.host](https://gsb.supercraft.host/blog/roblox-httpservice-external-backend)
+[Roblox HttpService → external backend on crux.supercraft.host](https://crux.supercraft.host/blog/roblox-httpservice-external-backend)
 for the architectural picture, and
-[Roblox DataStore vs external database](https://gsb.supercraft.host/blog/roblox-datastore-vs-external-database)
+[Roblox DataStore vs external database](https://crux.supercraft.host/blog/roblox-datastore-vs-external-database)
 for the trade-offs.
 
 What this means in practice:
@@ -94,7 +94,7 @@ What this means in practice:
 | `loginAnonymous()` | `gsb:VerifyPlayer(player.UserId)` |
 | `setPlayerDocument(pid, key, value)` | `gsb:GetDataStore(key):SetAsync(pid, value)` |
 | `getPlayerDocument(pid, key)` | `gsb:GetDataStore(key):GetAsync(pid)` |
-| Server-registry (`registerServer`) | n/a — Roblox `game.JobId` already identifies servers |
+| Server-registry (`registerServer`) | n/a - Roblox `game.JobId` already identifies servers |
 
 ---
 
@@ -104,9 +104,9 @@ What this means in practice:
 
 | Call | Description |
 |---|---|
-| `GSB.init(projectID, serverToken, environmentID)` | Configure the module (call once at server boot) |
+| `Crux.init(projectID, serverToken, environmentID)` | Configure the module (call once at server boot) |
 
-### Player Documents (DataStore-shaped) — [concepts](https://gsb.supercraft.host/blog/cross-progression-and-cross-save-backend)
+### Player Documents (DataStore-shaped) - [concepts](https://crux.supercraft.host/blog/cross-progression-and-cross-save-backend)
 
 | Call | Description |
 |---|---|
@@ -120,9 +120,9 @@ What this means in practice:
 
 | Call | Description |
 |---|---|
-| `gsb:VerifyPlayer(robloxUserID)` | Establish (or get) a GSB player record for a Roblox user |
+| `gsb:VerifyPlayer(robloxUserID)` | Establish (or get) a Crux player record for a Roblox user |
 
-### Leaderboards — [esports backends post](https://gsb.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
+### Leaderboards - [esports backends post](https://crux.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
 
 | Call | Description |
 |---|---|
@@ -138,7 +138,7 @@ What this means in practice:
 | `gsb:GetPlayerEconomy(playerID)` | Balances + inventory |
 | `gsb:AdjustEconomy(playerID, balanceAdjustments, inventoryAdjustments)` | Atomic credit / deduct |
 
-### Matchmaking — [skill-based MM architecture](https://gsb.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
+### Matchmaking - [skill-based MM architecture](https://crux.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
 
 | Call | Description |
 |---|---|
@@ -150,7 +150,7 @@ What this means in practice:
 
 | Call | Description |
 |---|---|
-| `gsb:GetServers(filters)` | Browse the registry (Roblox can't *register* servers via GSB; use `game.JobId` to identify your own) |
+| `gsb:GetServers(filters)` | Browse the registry (Roblox can't *register* servers via Crux; use `game.JobId` to identify your own) |
 
 ### Config delivery
 
@@ -168,9 +168,9 @@ All blocking calls run inside `HttpService` and automatically retry on
 ```lua
 local top = gsb:GetLeaderboardTop("weekly", 10)
 if top.error then
-    warn(("GSB %d: %s"):format(top.status, top.error))
+    warn(("Crux %d: %s"):format(top.status, top.error))
 else
-    -- success — iterate
+    -- success - iterate
 end
 ```
 
@@ -183,7 +183,7 @@ local ok, err = pcall(function()
     return saves:SetAsync(player.UserId, payload)
 end)
 if not ok then
-    warn("GSB write failed: " .. tostring(err))
+    warn("Crux write failed: " .. tostring(err))
 end
 ```
 
@@ -193,9 +193,9 @@ See [`docs/ERROR_HANDLING.md`](../../docs/ERROR_HANDLING.md).
 
 ## Cross-experience progression
 
-GSB's killer Roblox feature is **shared player data across different
+Crux's killer Roblox feature is **shared player data across different
 Roblox experiences in your account**. Two experiences using the same
-GSB `projectID` see the same player documents and economy:
+Crux `projectID` see the same player documents and economy:
 
 ```lua
 -- In Experience A (a lobby):
@@ -203,19 +203,19 @@ saves:SetAsync(player.UserId, { gold = 100, skin = "knight" })
 
 -- In Experience B (a battle arena):
 local data = saves:GetAsync(player.UserId)
-print(data.gold) -- 100 — set by Experience A
+print(data.gold) -- 100 - set by Experience A
 ```
 
 This is impossible with Roblox's built-in DataStoreService, which scopes
 data per experience. See [Roblox cross-experience progression on
-gsb.supercraft.host](https://gsb.supercraft.host/blog/roblox-cross-experience-progression).
+crux.supercraft.host](https://crux.supercraft.host/blog/roblox-cross-experience-progression).
 
 ---
 
 ## HTTP budget
 
 Roblox `HttpService` has rate limits per game server. The SDK is
-designed to fit comfortably inside them at typical traffic — every call
+designed to fit comfortably inside them at typical traffic - every call
 is one HTTP request, no polling. For high-traffic games batch your
 writes via `UpdateAsync` rather than calling `SetAsync` from every
 script that touches the data.
@@ -225,22 +225,22 @@ script that touches the data.
 ## Examples
 
 - [`examples/roblox/leaderboard.lua`](../../examples/roblox/leaderboard.lua)
-  — leaderboard end-to-end in a server script.
+  - leaderboard end-to-end in a server script.
 
 ---
 
 ## FAQ
 
-**Why does it require HttpService?**  GSB is an external service. You
+**Why does it require HttpService?**  Crux is an external service. You
 must enable HttpService in Game Settings → Security → "Allow HTTP
 Requests".
 
-**Can I call GSB from a LocalScript?**  No. `HttpService` is server-only,
+**Can I call Crux from a LocalScript?**  No. `HttpService` is server-only,
 and exposing a server token to clients would be catastrophic. Have your
-server script handle GSB calls and bridge results to clients via
+server script handle Crux calls and bridge results to clients via
 RemoteEvents.
 
-**Does it work in Roblox Studio?**  Yes — Studio's "Run" / "Start"
+**Does it work in Roblox Studio?**  Yes - Studio's "Run" / "Start"
 flow has HttpService enabled when you tick the setting. Test on a real
 private-server place too.
 
@@ -248,13 +248,13 @@ private-server place too.
 
 ## Don't want to operate this yourself?
 
-[**gsb.supercraft.host**](https://gsb.supercraft.host/) is GSB managed.
-Pricing: [/pricing](https://gsb.supercraft.host/pricing). Sizing:
-[/cost-calculator](https://gsb.supercraft.host/cost-calculator). Roblox
+[**crux.supercraft.host**](https://crux.supercraft.host/) is Crux managed.
+Pricing: [/pricing](https://crux.supercraft.host/pricing). Sizing:
+[/cost-calculator](https://crux.supercraft.host/cost-calculator). Roblox
 deep-dives:
-[HttpService → external backend](https://gsb.supercraft.host/blog/roblox-httpservice-external-backend),
-[DataStore vs external database](https://gsb.supercraft.host/blog/roblox-datastore-vs-external-database),
-[Cross-experience progression](https://gsb.supercraft.host/blog/roblox-cross-experience-progression).
+[HttpService → external backend](https://crux.supercraft.host/blog/roblox-httpservice-external-backend),
+[DataStore vs external database](https://crux.supercraft.host/blog/roblox-datastore-vs-external-database),
+[Cross-experience progression](https://crux.supercraft.host/blog/roblox-cross-experience-progression).
 
 ## License
 

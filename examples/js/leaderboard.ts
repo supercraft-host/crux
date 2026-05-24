@@ -3,13 +3,13 @@
  *
  * Run:
  *   npm install @supercraft/gsb tsx
- *   GSB_URL=https://gsb.supercraft.host \
+ *   GSB_URL=https://crux.supercraft.host \
  *   GSB_PROJECT=proj_xxx GSB_ENV=env_xxx GSB_KEY=gsb_apikey_xxx \
  *   tsx examples/js/leaderboard.ts
  */
 import { GSBClient } from "@supercraft/gsb";
 
-const url        = process.env.GSB_URL     ?? "https://gsb.supercraft.host";
+const url        = process.env.GSB_URL     ?? "https://crux.supercraft.host";
 const projectId  = process.env.GSB_PROJECT ?? "proj_xxx";
 const envId      = process.env.GSB_ENV     ?? "env_xxx";
 const apiKey     = process.env.GSB_KEY     ?? "gsb_apikey_xxx";

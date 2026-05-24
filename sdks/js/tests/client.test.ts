@@ -2,8 +2,8 @@
  * Tests for @supercraft/gsb. Mock fetch via Vitest, assert the request
  * shape and the error/retry behaviour.
  *
- * These tests guard the *contract* — header construction, retries on
- * 429/503, error mapping. They don't talk to a real GSB instance.
+ * These tests guard the *contract* - header construction, retries on
+ * 429/503, error mapping. They don't talk to a real Crux instance.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GSBClient, GSBError } from "../src/index.js";

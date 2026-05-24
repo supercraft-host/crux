@@ -3,12 +3,12 @@
 // Attach to any GameObject in a scene; configure the inspector fields.
 // See sdks/unity/README.md for installation.
 using System;
-using Supercraft.GSB;
+using Supercraft.Crux;
 using UnityEngine;
 
 public class Leaderboard : MonoBehaviour
 {
-    [SerializeField] private string baseUrl       = "https://gsb.supercraft.host";
+    [SerializeField] private string baseUrl       = "https://crux.supercraft.host";
     [SerializeField] private string projectId     = "proj_xxx";
     [SerializeField] private string environmentId = "env_xxx";
     [SerializeField] private string apiKey        = "gsb_apikey_xxx";

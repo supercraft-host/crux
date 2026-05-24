@@ -1,17 +1,17 @@
-## GSB - Supercraft Game Services Backend SDK for Godot 4
+## Crux - Crux SDK for Godot 4
 ##
 ## Add as an Autoload (Project → Project Settings → Autoload) for global access,
 ## or instantiate manually and add_child() it to a node in your scene.
 ##
 ## Usage (server mode - dedicated game server):
-##   GSB.init_server("https://api.gsb.dev", "proj_...", "env_...", "gsb_servertoken_...")
+##   Crux.init_server("https://api.gsb.dev", "proj_...", "env_...", "gsb_servertoken_...")
 ##
 ## Usage (player mode - game client):
-##   GSB.init_player("https://api.gsb.dev", "proj_...", "env_...", "gsb_apikey_...")
-##   var auth = await GSB.login_anonymous()
-##   var doc  = await GSB.get_player_document(auth.player_id, "inventory")
+##   Crux.init_player("https://api.gsb.dev", "proj_...", "env_...", "gsb_apikey_...")
+##   var auth = await Crux.login_anonymous()
+##   var doc  = await Crux.get_player_document(auth.player_id, "inventory")
 
-class_name GSB
+class_name Crux
 extends Node
 
 # ── Configuration ─────────────────────────────────────────────────────────────
@@ -64,7 +64,7 @@ func register_email(email: String, password: String) -> Dictionary:
 ## Refresh the player access token using the stored refresh token.
 func refresh_token() -> Dictionary:
 	if _refresh_token.is_empty():
-		push_error("GSB: no refresh token - call a login method first")
+		push_error("Crux: no refresh token - call a login method first")
 		return {}
 	return await _auth_request("/v1/auth/refresh", {"refresh_token": _refresh_token})
 
@@ -233,13 +233,13 @@ func _env(suffix: String) -> String:
 func _runtime_auth() -> String:
 	if not _server_token.is_empty(): return "ServerToken " + _server_token
 	if not _player_token.is_empty(): return "Bearer "      + _player_token
-	push_error("GSB: no server token or player token - call init_server() or a login method first")
+	push_error("Crux: no server token or player token - call init_server() or a login method first")
 	return ""
 
 
 func _server_auth() -> String:
 	if not _server_token.is_empty(): return "ServerToken " + _server_token
-	push_error("GSB: server token required - call init_server()")
+	push_error("Crux: server token required - call init_server()")
 	return ""
 
 
@@ -272,7 +272,7 @@ func _request(method: String, path: String, body: Dictionary, auth_header: Strin
 		var err := http.request_raw(url, headers, http_method, body_bytes)
 		if err != OK:
 			http.queue_free()
-			push_error("GSB: HTTPRequest error %d on %s %s" % [err, method, path])
+			push_error("Crux: HTTPRequest error %d on %s %s" % [err, method, path])
 			return {}
 
 		var response = await http.request_completed
@@ -292,12 +292,12 @@ func _request(method: String, path: String, body: Dictionary, auth_header: Strin
 		if response_code >= 400:
 			var parsed = _parse_json(body_str)
 			var msg    = parsed.get("message", body_str)
-			push_error("GSB: HTTP %d on %s %s - %s" % [response_code, method, path, msg])
+			push_error("Crux: HTTP %d on %s %s - %s" % [response_code, method, path, msg])
 			return {}
 
 		return _parse_json(body_str)
 
-	push_error("GSB: max retries exceeded for %s %s" % [method, path])
+	push_error("Crux: max retries exceeded for %s %s" % [method, path])
 	return {}
 
 
@@ -312,7 +312,7 @@ func _request_bytes(path: String, auth_header: String) -> PackedByteArray:
 	var response = await http.request_completed
 	http.queue_free()
 	if response[1] >= 400:
-		push_error("GSB: HTTP %d downloading bundle" % response[1])
+		push_error("Crux: HTTP %d downloading bundle" % response[1])
 		return PackedByteArray()
 	return response[3]
 

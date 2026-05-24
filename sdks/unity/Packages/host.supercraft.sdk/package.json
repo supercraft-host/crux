@@ -1,8 +1,8 @@
 {
   "name": "host.supercraft.gsb",
   "version": "1.0.0",
-  "displayName": "Supercraft GSB SDK",
-  "description": "Unity SDK for GSB (Game Services Backend): player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
+  "displayName": "Crux SDK",
+  "description": "Unity SDK for Crux (Game Services Backend): player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
   "unity": "2021.3",
   "author": {
     "name": "Supercraft",

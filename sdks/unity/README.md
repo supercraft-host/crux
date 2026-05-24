@@ -1,6 +1,6 @@
-# Supercraft GSB — Unity SDK
+# Crux - Unity SDK
 
-> Unity UPM package for [GSB — Supercraft Game Services Backend](https://gsb.supercraft.host/).
+> Unity UPM package for [Crux - Crux](https://crux.supercraft.host/).
 > Unity 2021.3 LTS or newer.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -9,29 +9,29 @@
 
 ## Install
 
-### Option A — UPM via Git URL *(recommended)*
+### Option A - UPM via Git URL *(recommended)*
 
 In Unity: **Window → Package Manager → + → Add package from git URL…**
 and paste:
 
 ```
-https://gitlab.com/supercraft1/game-server-backend.git?path=sdks/unity/Packages/host.supercraft.sdk
+https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.supercraft.sdk
 ```
 
 UPM will fetch the package and add it to `Packages/manifest.json`. Pin
 a version by appending `#v-unity/1.0.0`.
 
-### Option B — Local manifest entry
+### Option B - Local manifest entry
 
 ```json
 {
   "dependencies": {
-    "host.supercraft.gsb": "https://gitlab.com/supercraft1/game-server-backend.git?path=sdks/unity/Packages/host.supercraft.sdk"
+    "host.supercraft.gsb": "https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.supercraft.sdk"
   }
 }
 ```
 
-### Option C — Add package from disk
+### Option C - Add package from disk
 
 If you've cloned this repo locally, **Window → Package Manager → + →
 Add package from disk…** and point at
@@ -39,10 +39,10 @@ Add package from disk…** and point at
 
 ---
 
-## Quick start — game client
+## Quick start - game client
 
 ```csharp
-using Supercraft.GSB;
+using Supercraft.Crux;
 using UnityEngine;
 
 public class GsbBootstrap : MonoBehaviour
@@ -50,7 +50,7 @@ public class GsbBootstrap : MonoBehaviour
     async void Start()
     {
         var gsb = GSBClient.ForPlayer(
-            baseUrl:       "https://gsb.supercraft.host",
+            baseUrl:       "https://crux.supercraft.host",
             projectId:     "proj_xxx",
             environmentId: "env_xxx",
             apiKey:        "gsb_apikey_xxx"
@@ -60,7 +60,7 @@ public class GsbBootstrap : MonoBehaviour
         var auth = await gsb.LoginAnonymousAsync();
         Debug.Log($"Player: {auth.player_id}");
 
-        // Save player data — any JSON shape works.
+        // Save player data - any JSON shape works.
         await gsb.SetPlayerDocumentAsync(
             auth.player_id, "profile",
             "{\"name\":\"Ada\",\"level\":5}"
@@ -77,13 +77,13 @@ public class GsbBootstrap : MonoBehaviour
 }
 ```
 
-## Quick start — dedicated server
+## Quick start - dedicated server
 
 ```csharp
-using Supercraft.GSB;
+using Supercraft.Crux;
 
 var gsb = GSBClient.ForServer(
-    baseUrl:       "https://gsb.supercraft.host",
+    baseUrl:       "https://crux.supercraft.host",
     projectId:     "proj_xxx",
     environmentId: "env_xxx",
     serverToken:   "gsb_servertoken_xxx"
@@ -123,7 +123,7 @@ Debug.Log(doc.raw_value); // raw JSON string
 | `GSBClient.ForPlayer(baseUrl, projectId, environmentId, apiKey)` | Client mode |
 | `GSBClient.ForServer(baseUrl, projectId, environmentId, serverToken)` | Server mode |
 
-### Auth — [concepts](https://gsb.supercraft.host/blog/guest-login-and-account-upgrade)
+### Auth - [concepts](https://crux.supercraft.host/blog/guest-login-and-account-upgrade)
 
 | Method | Description |
 |---|---|
@@ -133,7 +133,7 @@ Debug.Log(doc.raw_value); // raw JSON string
 | `RefreshTokenAsync()` | Refresh access token (called automatically by the SDK) |
 | `LogoutAsync()` | Revoke the current session |
 
-### Player Documents — [concepts](https://gsb.supercraft.host/blog/cross-progression-and-cross-save-backend)
+### Player Documents - [concepts](https://crux.supercraft.host/blog/cross-progression-and-cross-save-backend)
 
 | Method | Description |
 |---|---|
@@ -144,7 +144,7 @@ Debug.Log(doc.raw_value); // raw JSON string
 | `BatchGetPlayerDocumentsAsync(playerId, keys[])` | Fetch multiple keys |
 | `BatchWritePlayerDocumentsAsync(playerId, writes[])` | Write multiple keys atomically |
 
-### Leaderboards — [concepts](https://gsb.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
+### Leaderboards - [concepts](https://crux.supercraft.host/blog/esports-tournament-backends-scaling-million-viewer-events)
 
 | Method | Description |
 |---|---|
@@ -160,7 +160,7 @@ Debug.Log(doc.raw_value); // raw JSON string
 | `GetPlayerEconomyAsync(playerId)` | Balances + inventory |
 | `AdjustEconomyAsync(playerId, balances?, inventory?)` | Atomic credit / deduct |
 
-### Matchmaking — [architecture](https://gsb.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
+### Matchmaking - [architecture](https://crux.supercraft.host/blog/skill-based-matchmaking-architecture-2026)
 
 | Method | Description |
 |---|---|
@@ -168,7 +168,7 @@ Debug.Log(doc.raw_value); // raw JSON string
 | `GetMatchmakingStatusAsync()` | Poll for result |
 | `LeaveMatchmakingAsync(playerId)` | Leave the queue |
 
-### Server Registry — [orchestration guide](https://gsb.supercraft.host/blog/game-server-orchestration-guide)
+### Server Registry - [orchestration guide](https://crux.supercraft.host/blog/game-server-orchestration-guide)
 
 *Server token required.*
 
@@ -199,8 +199,8 @@ try {
 } catch (GSBException ex) {
     switch (ex.StatusCode)
     {
-        case 404: /* first write — no document yet */ break;
-        case 409: /* optimistic-concurrency conflict — re-read + retry */ break;
+        case 404: /* first write - no document yet */ break;
+        case 409: /* optimistic-concurrency conflict - re-read + retry */ break;
         default:  Debug.LogError($"HTTP {ex.StatusCode}: {ex.Message}"); break;
     }
 }
@@ -222,7 +222,7 @@ The SDK already retries on `429`/`503` with exponential backoff. See
 
 Works in: standalone (Win/Mac/Linux), iOS, Android, WebGL, dedicated
 server (headless) builds. WebGL CORS: ensure your backend serves the
-right `Access-Control-Allow-Origin` headers, or use `gsb.supercraft.host`
+right `Access-Control-Allow-Origin` headers, or use `crux.supercraft.host`
 (already configured for browser games).
 
 ---
@@ -230,7 +230,7 @@ right `Access-Control-Allow-Origin` headers, or use `gsb.supercraft.host`
 ## Examples
 
 - [`examples/unity/Leaderboard.cs`](../../examples/unity/Leaderboard.cs)
-  — weekly leaderboard scene script.
+  - weekly leaderboard scene script.
 
 ---
 
@@ -238,28 +238,28 @@ right `Access-Control-Allow-Origin` headers, or use `gsb.supercraft.host`
 
 **Does the SDK pull any third-party packages?**  No. Pure C# + `HttpClient`.
 
-**Can I use it on the IL2CPP backend?**  Yes — no reflection, no dynamic
+**Can I use it on the IL2CPP backend?**  Yes - no reflection, no dynamic
 code generation.
 
-**Can I use it on Dedicated Server Build Target?**  Yes — that's the
+**Can I use it on Dedicated Server Build Target?**  Yes - that's the
 recommended target for `ForServer` mode.
 
 **Where can I see end-to-end Unity examples?**  See
-[Survival/co-op game backend patterns](https://gsb.supercraft.host/blog/survival-coop-game-backend-patterns)
-and [VR/AR/spatial computing backends](https://gsb.supercraft.host/blog/vr-ar-spatial-computing-game-backends).
+[Survival/co-op game backend patterns](https://crux.supercraft.host/blog/survival-coop-game-backend-patterns)
+and [VR/AR/spatial computing backends](https://crux.supercraft.host/blog/vr-ar-spatial-computing-game-backends).
 
 ---
 
 ## Don't want to host a backend?
 
-[**gsb.supercraft.host**](https://gsb.supercraft.host/) runs GSB so you
-don't have to. Pricing: [/pricing](https://gsb.supercraft.host/pricing).
-Sizing: [/cost-calculator](https://gsb.supercraft.host/cost-calculator).
+[**crux.supercraft.host**](https://crux.supercraft.host/) runs Crux so you
+don't have to. Pricing: [/pricing](https://crux.supercraft.host/pricing).
+Sizing: [/cost-calculator](https://crux.supercraft.host/cost-calculator).
 Migration guides:
-[PlayFab](https://gsb.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb),
-[Beamable](https://gsb.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison),
-[AccelByte](https://gsb.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison),
-[Firebase](https://gsb.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026).
+[PlayFab](https://crux.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb),
+[Beamable](https://crux.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison),
+[AccelByte](https://crux.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison),
+[Firebase](https://crux.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026).
 
 ## License
 

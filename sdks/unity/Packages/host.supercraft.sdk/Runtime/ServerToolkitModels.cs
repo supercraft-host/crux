@@ -1,6 +1,6 @@
 using System;
 
-namespace Supercraft.GSB
+namespace Supercraft.Crux
 {
     [Serializable]
     public sealed class GSBOptions

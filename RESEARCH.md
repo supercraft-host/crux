@@ -1,14 +1,14 @@
-# Research — why GSB SDKs are open source (May 2026)
+# Research - why Crux SDKs are open source (May 2026)
 
 This document captures the strategy and competitive landscape behind
-publishing the GSB client SDKs under MIT. We keep it in-repo so future
+publishing the Crux client SDKs under MIT. We keep it in-repo so future
 contributors (and future-us) can verify the assumptions still hold.
 
 ## Strategy in one paragraph
 
-GSB itself is a hosted, commercial service. The SDKs are useless
+Crux itself is a hosted, commercial service. The SDKs are useless
 without the service, so publishing them as MIT carries zero competitive
-risk — every install is a signal that someone is committing to the GSB
+risk - every install is a signal that someone is committing to the Crux
 HTTP contract. We get the discovery and trust benefits of being a
 first-class citizen in each engine's package ecosystem (npm, Godot
 Asset Library, UPM, Wally), and the community handles the long tail of
@@ -43,15 +43,15 @@ Two observations:
 
 ## Sources
 
-- [Best Real-Time Game Backends 2026 — Namazu studios](https://namazustudios.com/best-real-time-game-backends/)
-- [Best Game Backend Service in 2026 — Leadr](https://www.leadr.gg/blog/the-best-backend-service-for-your-game-in-2026)
-- [Best Mobile Game Backend Providers 2026 — Metaplay](https://www.metaplay.io/blog/best-game-backend-providers)
-- [Why Studios Are Re-Evaluating PlayFab — AccelByte](https://accelbyte.io/blog/why-studios-are-re-evaluating-playfab-and-how-accelbyte-compares)
-- [Nakama Alternatives — SourceForge](https://sourceforge.net/software/product/Nakama-Game-Server/alternatives)
+- [Best Real-Time Game Backends 2026 - Namazu studios](https://namazustudios.com/best-real-time-game-backends/)
+- [Best Game Backend Service in 2026 - Leadr](https://www.leadr.gg/blog/the-best-backend-service-for-your-game-in-2026)
+- [Best Mobile Game Backend Providers 2026 - Metaplay](https://www.metaplay.io/blog/best-game-backend-providers)
+- [Why Studios Are Re-Evaluating PlayFab - AccelByte](https://accelbyte.io/blog/why-studios-are-re-evaluating-playfab-and-how-accelbyte-compares)
+- [Nakama Alternatives - SourceForge](https://sourceforge.net/software/product/Nakama-Game-Server/alternatives)
 - [Beamable vs Nakama](https://beamable.com/blog/choosing-the-right-backend-beamable-vs-nakama)
-- [Top PlayFab Alternatives — Slashdot](https://slashdot.org/software/p/PlayFab/alternatives)
-- [Nakama vs PlayFab — Code Wizards](https://codewizards.io/nakama-vs-playfab-online-player-services/)
-- [Selecting the Right Backend — LootLocker](https://lootlocker.com/blog/selecting-the-right-backend-for-your-game)
+- [Top PlayFab Alternatives - Slashdot](https://slashdot.org/software/p/PlayFab/alternatives)
+- [Nakama vs PlayFab - Code Wizards](https://codewizards.io/nakama-vs-playfab-online-player-services/)
+- [Selecting the Right Backend - LootLocker](https://lootlocker.com/blog/selecting-the-right-backend-for-your-game)
 - [Heroic Labs (Nakama) GitHub](https://github.com/heroiclabs/)
 
 ## Distribution channels we target
@@ -70,12 +70,12 @@ the upside we're capturing.
 
 Out of scope for this repo:
 
-- **The GSB server** — that's the product. Hosted at
-  [gsb.supercraft.host](https://gsb.supercraft.host/), self-hosting is
-  not on the roadmap. See the [Nakama comparison post](https://gsb.supercraft.host/blog/nakama-open-source-vs-managed-backend)
+- **The Crux server** - that's the product. Hosted at
+  [crux.supercraft.host](https://crux.supercraft.host/), self-hosting is
+  not on the roadmap. See the [Nakama comparison post](https://crux.supercraft.host/blog/nakama-open-source-vs-managed-backend)
   for why we don't compete on the "you can run it yourself" axis.
 - **Internal admin tools and dashboards.**
-- **Webhook signing keys and any per-tenant secrets** — those never
+- **Webhook signing keys and any per-tenant secrets** - those never
   appear in this repo or the OpenAPI spec.
 
 ## Future SDKs (community-first)
@@ -86,11 +86,11 @@ MIT, (c) have a maintainer who answers issues, and (d) follow the
 folder layout in [`CONTRIBUTING.md`](CONTRIBUTING.md). Highest priority
 gaps:
 
-1. **Unreal Engine (C++ + Blueprint nodes)** — biggest demand after JS.
-2. **Rust** — Bevy is small but loud, and adds OSS-credibility surface.
-3. **C# (non-Unity)** — Stride, MonoGame, server-side game services.
-4. **Python** — tooling, leaderboard analytics, data pipelines.
-5. **Defold, Haxe, GDevelop** — niche but loyal communities; each gives
+1. **Unreal Engine (C++ + Blueprint nodes)** - biggest demand after JS.
+2. **Rust** - Bevy is small but loud, and adds OSS-credibility surface.
+3. **C# (non-Unity)** - Stride, MonoGame, server-side game services.
+4. **Python** - tooling, leaderboard analytics, data pipelines.
+5. **Defold, Haxe, GDevelop** - niche but loyal communities; each gives
    us a foothold in an ecosystem competitors don't bother with.
 
 The OpenAPI spec gives anyone a 70%-done client in minutes via

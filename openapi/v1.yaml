@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: GSB - Game Services Backend
+  title: Crux - Game Services Backend
   description: |
-    GSB is a high-performance, multi-tenant backend-as-a-service for games.
+    Crux is a high-performance, multi-tenant backend-as-a-service for games.
     It provides identity, persistent player data, seasonal leaderboards, matchmaking, economy, and social features.
     
     ## Authentication
@@ -11,10 +11,10 @@ info:
     - **Runtime APIs (Player)**: Use `Bearer <jwt_token>` in the `Authorization` header.
   version: 1.0.0
   contact:
-    name: GSB Support
-    url: https://gsb.supercraft.host
+    name: Crux Support
+    url: https://crux.supercraft.host
 servers:
-  - url: https://gsb.supercraft.host/v1
+  - url: https://crux.supercraft.host/v1
     description: Production API
   - url: http://localhost:8080/v1
     description: Local Development

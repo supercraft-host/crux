@@ -1,6 +1,6 @@
-# Supercraft GSB - Unity SDK
+# Crux - Unity SDK
 
-Unity UPM package for [GSB (Game Services Backend)](https://supercraft.dev). Covers player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.
+Unity UPM package for [Crux (Game Services Backend)](https://supercraft.dev). Covers player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.
 
 ## Installation
 
@@ -19,11 +19,11 @@ Or via **Package Manager → Add package from disk...** pointing at `host.superc
 ## Quick start - game client
 
 ```csharp
-using Supercraft.GSB;
+using Supercraft.Crux;
 
 // 1. Create client with your project's public API key
 var gsb = GSBClient.ForPlayer(
-    baseUrl:       "https://gsb.supercraft.host",
+    baseUrl:       "https://crux.supercraft.host",
     projectId:     "proj_...",
     environmentId: "env_...",
     apiKey:        "gsb_apikey_..."
@@ -48,10 +48,10 @@ foreach (var e in top)
 ## Quick start - dedicated game server
 
 ```csharp
-using Supercraft.GSB;
+using Supercraft.Crux;
 
 var gsb = GSBClient.ForServer(
-    baseUrl:       "https://gsb.supercraft.host",
+    baseUrl:       "https://crux.supercraft.host",
     projectId:     "proj_...",
     environmentId: "env_...",
     serverToken:   "gsb_servertoken_..."

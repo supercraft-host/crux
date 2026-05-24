@@ -19,7 +19,7 @@ import {
 } from "./types.js";
 
 /**
- * GSB client for JavaScript / TypeScript.
+ * Crux client for JavaScript / TypeScript.
  *
  * **Server mode** (Node.js game server / trusted backend):
  * ```ts
@@ -219,7 +219,7 @@ export class GSBClient {
       headers: { Authorization: this.runtimeAuth() },
       signal: AbortSignal.timeout(this.opts.timeoutMs),
     });
-    if (!resp.ok) throw new GSBError(resp.status, `GSB ${resp.status} downloading config bundle`);
+    if (!resp.ok) throw new GSBError(resp.status, `Crux ${resp.status} downloading config bundle`);
     return resp.arrayBuffer();
   }
 
@@ -232,12 +232,12 @@ export class GSBClient {
   private runtimeAuth(): string {
     if (this.opts.serverToken) return "ServerToken " + this.opts.serverToken;
     if (this.playerToken)      return "Bearer "      + this.playerToken;
-    throw new GSBError(0, "GSB: no server token or player token - call forServer() or a login method first.");
+    throw new GSBError(0, "Crux: no server token or player token - call forServer() or a login method first.");
   }
 
   private serverAuth(): string {
     if (this.opts.serverToken) return "ServerToken " + this.opts.serverToken;
-    throw new GSBError(0, "GSB: server token required - use GSBClient.forServer(...).");
+    throw new GSBError(0, "Crux: server token required - use GSBClient.forServer(...).");
   }
 
   private async send<T = unknown>(
@@ -285,14 +285,14 @@ export class GSBClient {
       if (!resp.ok) {
         let message = text;
         try { message = JSON.parse(text)?.message ?? text; } catch { /* ignore */ }
-        throw new GSBError(resp.status, `GSB ${resp.status} ${method} ${path}: ${message}`);
+        throw new GSBError(resp.status, `Crux ${resp.status} ${method} ${path}: ${message}`);
       }
 
       if (!text) return {} as T;
       return JSON.parse(text) as T;
     }
 
-    throw lastError ?? new GSBError(0, "GSB: max retries exceeded");
+    throw lastError ?? new GSBError(0, "Crux: max retries exceeded");
   }
 }
 

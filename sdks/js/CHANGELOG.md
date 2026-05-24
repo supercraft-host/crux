@@ -1,11 +1,11 @@
-# Changelog — `@supercraft/gsb` JS SDK
+# Changelog - `@supercraft/gsb` JS SDK
 
 ## [Unreleased]
 
 ### Added
 - Vitest test suite covering auth header construction, retry behaviour,
   document round-trips, leaderboard helpers, and error mapping.
-- Deep links into [gsb.supercraft.host](https://gsb.supercraft.host/)
+- Deep links into [crux.supercraft.host](https://crux.supercraft.host/)
   feature docs and migration guides from every API section.
 
 ### Notes

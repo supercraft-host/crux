@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-// Smoke test the JS SDK against a live GSB backend.
+// Smoke test the JS SDK against a live Crux backend.
 //
 // Reads credentials from env; see smoke/.env.example for the shape. Exits 0
 // on success, non-zero on failure. Each step prints a one-line status so a CI

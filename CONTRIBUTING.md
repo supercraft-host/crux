@@ -30,18 +30,18 @@ npm run build     # tsc → dist/
 ### Godot
 
 Open the SDK in Godot 4.1+ as a standalone project (the addon under
-`sdks/godot/addons/gsb/`). There's no Godot CI today — changes are
-manually smoke-tested against a local GSB.
+`sdks/godot/addons/gsb/`). There's no Godot CI today - changes are
+manually smoke-tested against a local Crux.
 
 ### Unity
 
 Open `sdks/unity/Packages/host.supercraft.sdk/` as a UPM package in
-Unity 2021.3 LTS or newer. There's no Unity CI today — changes are
+Unity 2021.3 LTS or newer. There's no Unity CI today - changes are
 manually smoke-tested.
 
 ### Roblox
 
-Use [Rojo](https://rojo.space/) to sync `sdks/roblox/GSB.lua` into a
+Use [Rojo](https://rojo.space/) to sync `sdks/roblox/Crux.lua` into a
 local Studio session. No Roblox CI today.
 
 ## PR checklist
@@ -80,13 +80,13 @@ Want to add a Python / Rust / Unreal SDK? Steps:
 
 Maintainers only. Each SDK has its own release cadence:
 
-- **JS** — `npm publish` from `sdks/js/`, tag `v<sdk>/<semver>` e.g.
+- **JS** - `npm publish` from `sdks/js/`, tag `v<sdk>/<semver>` e.g.
   `v-js/1.1.0`.
-- **Godot** — bump `version` in `addons/gsb/plugin.cfg`, tag
+- **Godot** - bump `version` in `addons/gsb/plugin.cfg`, tag
   `v-godot/<semver>`, submit to Godot Asset Library.
-- **Unity** — bump `version` in `Packages/host.supercraft.sdk/package.json`,
+- **Unity** - bump `version` in `Packages/host.supercraft.sdk/package.json`,
   tag `v-unity/<semver>`.
-- **Roblox** — bump `wally.toml`, tag `v-roblox/<semver>`, push to Wally.
+- **Roblox** - bump `wally.toml`, tag `v-roblox/<semver>`, push to Wally.
 
 Repo-level changes get tagged `v-repo/<date>` and only update
 `CHANGELOG.md` at the root.

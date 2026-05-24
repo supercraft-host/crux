@@ -1,9 +1,9 @@
-# Changelog — GSB Godot 4 SDK
+# Changelog - Crux Godot 4 SDK
 
 ## [Unreleased]
 
 ### Added
-- Deep links into [gsb.supercraft.host](https://gsb.supercraft.host/)
+- Deep links into [crux.supercraft.host](https://crux.supercraft.host/)
   feature docs from every section of the README.
 - Cross-references to monorepo `docs/AUTH.md` and `docs/ERROR_HANDLING.md`.
 

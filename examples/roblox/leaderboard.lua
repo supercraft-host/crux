@@ -1,24 +1,24 @@
 -- Weekly leaderboard, end-to-end.
 --
--- Put under ServerScriptService alongside GSB.lua. Replace IDs below.
+-- Put under ServerScriptService alongside Crux.lua. Replace IDs below.
 -- See sdks/roblox/README.md for installation.
 
-local GSB = require(game.ServerScriptService.GSB)
+local Crux = require(game.ServerScriptService.Crux)
 
 local PROJECT_ID    = "proj_xxx"
 local SERVER_TOKEN  = "gsb_servertoken_xxx"
 local ENVIRONMENT   = "env_xxx"
 local LEADERBOARD   = "weekly"
 
-local gsb = GSB.init(PROJECT_ID, SERVER_TOKEN, ENVIRONMENT)
+local gsb = Crux.init(PROJECT_ID, SERVER_TOKEN, ENVIRONMENT)
 
 local Players = game:GetService("Players")
 
 Players.PlayerAdded:Connect(function(player)
-    -- Establish the player's GSB record.
+    -- Establish the player's Crux record.
     local verify = gsb:VerifyPlayer(player.UserId)
     if verify.error then
-        warn(("GSB verify failed (%d): %s"):format(verify.status, verify.error))
+        warn(("Crux verify failed (%d): %s"):format(verify.status, verify.error))
         return
     end
 
