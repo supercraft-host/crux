@@ -22,7 +22,7 @@ Create a project in the [Crux dashboard](https://crux.supercraft.host), then cop
 ```ts
 import { CruxClient } from "crux-sdk";
 
-const gsb = CruxClient.forPlayer(
+const crux = CruxClient.forPlayer(
   "https://crux.supercraft.host",
   "<PROJECT_ID>",      // UUID
   "<ENVIRONMENT_ID>",  // UUID
@@ -30,18 +30,18 @@ const gsb = CruxClient.forPlayer(
 );
 
 // Log in (guest)
-const auth = await gsb.loginAnonymous();
+const auth = await crux.loginAnonymous();
 console.log("Player:", auth.player_id);
 
 // Save data
-await gsb.setPlayerDocument(auth.player_id, "settings", { volume: 0.8 });
+await crux.setPlayerDocument(auth.player_id, "settings", { volume: 0.8 });
 
 // Submit a score. The first argument is the leaderboard's UUID.
 const LEADERBOARD_ID = "<LEADERBOARD_UUID>";
-await gsb.submitScore(LEADERBOARD_ID, auth.player_id, 9900);
+await crux.submitScore(LEADERBOARD_ID, auth.player_id, 9900);
 
 // Get leaderboard
-const top = await gsb.getTop(LEADERBOARD_ID, 10);
+const top = await crux.getTop(LEADERBOARD_ID, 10);
 top.forEach(e => console.log(`#${e.rank} ${e.player_id}: ${e.score}`));
 ```
 
@@ -50,7 +50,7 @@ top.forEach(e => console.log(`#${e.rank} ${e.player_id}: ${e.score}`));
 ```ts
 import { CruxClient } from "crux-sdk";
 
-const gsb = CruxClient.forServer(
+const crux = CruxClient.forServer(
   "https://crux.supercraft.host",
   "<PROJECT_ID>",      // UUID
   "<ENVIRONMENT_ID>",  // UUID
@@ -58,7 +58,7 @@ const gsb = CruxClient.forServer(
 );
 
 // Register
-const server = await gsb.registerServer({
+const server = await crux.registerServer({
   server_id:    "node-01",
   name:         "Deathmatch EU #1",
   region:       "eu-west",
@@ -72,11 +72,11 @@ const server = await gsb.registerServer({
 });
 
 // Heartbeat (call every 30 s)
-setInterval(() => gsb.heartbeat(server.server_id), 30_000);
+setInterval(() => crux.heartbeat(server.server_id), 30_000);
 
 // Clean deregister on shutdown
 process.on("SIGTERM", async () => {
-  await gsb.deregisterServer(server.server_id);
+  await crux.deregisterServer(server.server_id);
   process.exit(0);
 });
 ```
@@ -151,7 +151,7 @@ All methods throw `CruxError` on HTTP errors:
 import { CruxClient, CruxError } from "crux-sdk";
 
 try {
-  const doc = await gsb.getPlayerDocument(playerId, "inventory");
+  const doc = await crux.getPlayerDocument(playerId, "inventory");
 } catch (e) {
   if (e instanceof CruxError) {
     console.error(`HTTP ${e.statusCode}:`, e.message);

@@ -92,7 +92,7 @@ var server = CruxClient.ForServer(baseUrl, projectId, envId, serverToken);
 ### Roblox (server-only)
 
 ```lua
-local gsb = Crux.init(projectId, serverToken, envId)
+local crux = Crux.init(projectId, serverToken, envId)
 ```
 
 ## Rotating keys

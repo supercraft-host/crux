@@ -111,7 +111,7 @@ end
 ------------------------------------------------------------------------
 -- DataStore emulation
 -- Mirrors Roblox DataStoreService semantics:
---   local ds = gsb:GetDataStore("coins")
+--   local ds = crux:GetDataStore("coins")
 --   ds:GetAsync(player.UserId)   → GET /players/{userId}/documents/coins
 --   ds:SetAsync(player.UserId, value)
 --   ds:UpdateAsync(player.UserId, transformFn)

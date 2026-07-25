@@ -39,7 +39,7 @@ retry loop; investigate the cause.
 import { CruxClient, GSBError } from "crux-sdk";
 
 try {
-  await gsb.getPlayerDocument(playerId, "inventory");
+  await crux.getPlayerDocument(playerId, "inventory");
 } catch (e) {
   if (e instanceof GSBError) {
     if (e.statusCode === 404) { /* first write */ }
@@ -67,7 +67,7 @@ if result.has("error"):
 
 ```csharp
 try {
-    var doc = await gsb.GetPlayerDocumentAsync(playerId, "inventory");
+    var doc = await crux.GetPlayerDocumentAsync(playerId, "inventory");
 } catch (GSBException ex) {
     if (ex.StatusCode == 404) { /* first write */ }
     if (ex.StatusCode == 409) { /* concurrency */ }
@@ -79,13 +79,13 @@ try {
 
 ```lua
 local ok, result = pcall(function()
-    return gsb:GetPlayerEconomy(player.UserId)
+    return crux:GetPlayerEconomy(player.UserId)
 end)
 if not ok then
     warn("Crux call failed: " .. tostring(result))
 end
 -- For methods that return result tables:
-local res = gsb:GetLeaderboardTop("weekly", 10)
+local res = crux:GetLeaderboardTop("weekly", 10)
 if res.error then
     warn("Crux " .. res.status .. ": " .. res.error)
 end
@@ -98,10 +98,10 @@ pass it, Crux compares the version to the one currently stored and
 returns `409 Conflict` if they differ. Pattern:
 
 ```ts
-const doc = await gsb.getPlayerDocument(playerId, "inventory");
+const doc = await crux.getPlayerDocument(playerId, "inventory");
 const updated = { ...doc.value, gold: doc.value.gold + 100 };
 try {
-  await gsb.setPlayerDocument(playerId, "inventory", updated, doc.version);
+  await crux.setPlayerDocument(playerId, "inventory", updated, doc.version);
 } catch (e) {
   if (e instanceof GSBError && e.statusCode === 409) {
     // Someone else wrote first - re-read and re-merge.

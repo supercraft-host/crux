@@ -24,13 +24,13 @@ import {
  *
  * **Server mode** (Node.js game server / trusted backend):
  * ```ts
- * const gsb = CruxClient.forServer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>");
+ * const crux = CruxClient.forServer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>");
  * ```
  *
  * **Player mode** (browser or game client):
  * ```ts
- * const gsb = CruxClient.forPlayer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>");
- * const auth = await gsb.loginAnonymous();
+ * const crux = CruxClient.forPlayer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>");
+ * const auth = await crux.loginAnonymous();
  * ```
  *
  * PROJECT_ID and ENVIRONMENT_ID are UUIDs; API_KEY / SERVER_TOKEN are the secret

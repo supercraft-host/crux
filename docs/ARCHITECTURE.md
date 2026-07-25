@@ -117,7 +117,7 @@ We mitigate the discoverability cost by:
 - npm `package.json` is in `sdks/js/`, publishable as
   `crux-sdk` - npm doesn't care it's in a subfolder.
 - Unity UPM uses the Git URL path query:
-  `git+https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.supercraft.sdk`.
+  `git+https://github.com/supercraft-host/crux.git?path=sdks/unity/Packages/host.supercraft.sdk`.
 - Godot Asset Library accepts a `subfolder` field on submission; we
   point at `sdks/godot/addons/crux/`.
 - Wally takes a `path` in `wally.toml`; we point at `sdks/roblox/`.

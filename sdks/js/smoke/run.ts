@@ -23,13 +23,13 @@ function env(name: string, fallback?: string): string {
   return v;
 }
 
-const BASE_URL   = env("CRUX_BASE_URL", "https://gsb.test.supercraft.host");
+const BASE_URL   = env("CRUX_BASE_URL", "https://crux.supercraft.host");
 const PROJECT_ID = env("CRUX_PROJECT_ID");
 const ENV_ID     = env("CRUX_ENV_ID");
 const API_KEY    = env("CRUX_API_KEY");
 
 const run = async () => {
-  const gsb = CruxClient.forPlayer(BASE_URL, PROJECT_ID, ENV_ID, API_KEY);
+  const crux = CruxClient.forPlayer(BASE_URL, PROJECT_ID, ENV_ID, API_KEY);
 
   const anonId = `smoke-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   // Anonymous login is the only path that doesn't need a pre-existing user;
@@ -44,21 +44,21 @@ const run = async () => {
     return res.json() as Promise<{ access_token: string; player_id: string }>;
   })();
   // Hand the token to the SDK so the runtime calls below pick it up.
-  (gsb as unknown as { playerToken: string; playerId: string }).playerToken = auth.access_token;
-  (gsb as unknown as { playerToken: string; playerId: string }).playerId    = auth.player_id;
+  (crux as unknown as { playerToken: string; playerId: string }).playerToken = auth.access_token;
+  (crux as unknown as { playerToken: string; playerId: string }).playerId    = auth.player_id;
   console.log(`ok   login anonymous  player=${auth.player_id}`);
 
   const DOC = "smoke-profile";
 
-  const initial = await gsb.setPlayerDocument(auth.player_id, DOC, { xp: 10, level: 1 });
+  const initial = await crux.setPlayerDocument(auth.player_id, DOC, { xp: 10, level: 1 });
   if (initial.version !== 1) throw new Error(`expected v1, got v${initial.version}`);
   console.log(`ok   setPlayerDocument v${initial.version}`);
 
-  const read = await gsb.getPlayerDocument<{ xp: number; level: number }>(auth.player_id, DOC);
+  const read = await crux.getPlayerDocument<{ xp: number; level: number }>(auth.player_id, DOC);
   if (read.value.xp !== 10 || read.value.level !== 1) throw new Error(`read mismatch: ${JSON.stringify(read.value)}`);
   console.log(`ok   getPlayerDocument`);
 
-  const patched = await gsb.patchPlayerDocument(auth.player_id, DOC, [
+  const patched = await crux.patchPlayerDocument(auth.player_id, DOC, [
     { op: "set", path: ["xp"], value: 25 },
     { op: "remove", path: ["level"] },
   ], read.version);
@@ -68,7 +68,7 @@ const run = async () => {
   // Optimistic-lock conflict: sending the stale version must be rejected as 409.
   let conflicted = false;
   try {
-    await gsb.setPlayerDocument(auth.player_id, DOC, { xp: 999 }, initial.version);
+    await crux.setPlayerDocument(auth.player_id, DOC, { xp: 999 }, initial.version);
   } catch (e) {
     if (e instanceof CruxError && e.statusCode === 409) conflicted = true;
     else throw e;
@@ -76,11 +76,11 @@ const run = async () => {
   if (!conflicted) throw new Error("expected 409 on stale-version write");
   console.log(`ok   stale-version write → 409`);
 
-  const batch = await gsb.batchGetPlayerDocuments(auth.player_id, [DOC]);
+  const batch = await crux.batchGetPlayerDocuments(auth.player_id, [DOC]);
   if (batch.length !== 1 || batch[0].key !== DOC) throw new Error(`batch read mismatch: ${JSON.stringify(batch)}`);
   console.log(`ok   batchGetPlayerDocuments`);
 
-  await gsb.deletePlayerDocument(auth.player_id, DOC);
+  await crux.deletePlayerDocument(auth.player_id, DOC);
   console.log(`ok   deletePlayerDocument`);
 
   console.log("SMOKE OK");

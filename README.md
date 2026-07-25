@@ -71,10 +71,10 @@ differences" section for the why.
 - [Game backend as a service - complete guide](https://crux.supercraft.host/blog/game-backend-as-a-service-complete-guide)
 
 ### Coming from somewhere else?
-- [Migrate from PlayFab](https://crux.supercraft.host/blog/migrate-from-playfab-to-supercraft-gsb)
-- [Firebase for games - what to use instead](https://crux.supercraft.host/blog/firebase-for-games-alternative-supercraft-gsb-2026)
-- [Beamable vs Crux](https://crux.supercraft.host/blog/beamable-vs-supercraft-gsb-comparison)
-- [AccelByte vs Crux](https://crux.supercraft.host/blog/accelbyte-vs-supercraft-gsb-comparison)
+- [Migrate from PlayFab](https://crux.supercraft.host/blog/migrate-from-playfab-to-crux)
+- [Firebase for games - what to use instead](https://crux.supercraft.host/blog/firebase-for-games-alternative-crux-2026)
+- [Beamable vs Crux](https://crux.supercraft.host/blog/beamable-vs-crux-comparison)
+- [AccelByte vs Crux](https://crux.supercraft.host/blog/accelbyte-vs-crux-comparison)
 - [Nakama (open source) vs managed backend](https://crux.supercraft.host/blog/nakama-open-source-vs-managed-backend)
 - [Colyseus vs managed backend](https://crux.supercraft.host/blog/colyseus-vs-managed-backend)
 
@@ -88,7 +88,7 @@ differences" section for the why.
 ## Repository layout
 
 ```
-gsb-sdks/
+crux/
 ├── README.md             you are here
 ├── RESEARCH.md           why these SDKs exist, OSS landscape, sources
 ├── CHANGELOG.md          monorepo-level changes
@@ -128,13 +128,13 @@ npm install crux-sdk
 ```ts
 import { CruxClient } from "crux-sdk";
 
-const gsb = CruxClient.forPlayer(
+const crux = CruxClient.forPlayer(
   "https://crux.supercraft.host",
   "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>"
 );
-const auth = await gsb.loginAnonymous();
-await gsb.submitScore("weekly", auth.player_id, 9900);
-const top = await gsb.getTop("weekly", 10);
+const auth = await crux.loginAnonymous();
+await crux.submitScore("weekly", auth.player_id, 9900);
+const top = await crux.getTop("weekly", 10);
 ```
 See [`sdks/js/README.md`](sdks/js/README.md).
 
@@ -154,10 +154,10 @@ git+https://github.com/supercraft-host/crux.git?path=sdks/unity/Packages/host.su
 ```
 
 ```csharp
-var gsb = CruxClient.ForPlayer(
+var crux = CruxClient.ForPlayer(
     "https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>");
-var auth = await gsb.LoginAnonymousAsync();
-await gsb.SubmitScoreAsync("weekly", auth.player_id, 9900);
+var auth = await crux.LoginAnonymousAsync();
+await crux.SubmitScoreAsync("weekly", auth.player_id, 9900);
 ```
 See [`sdks/unity/README.md`](sdks/unity/README.md).
 
@@ -165,8 +165,8 @@ See [`sdks/unity/README.md`](sdks/unity/README.md).
 
 ```lua
 local Crux = require(game.ServerScriptService.Crux)
-local gsb = Crux.init("<PROJECT_ID>", "<SERVER_TOKEN>", "<ENVIRONMENT_ID>")
-gsb:SubmitScore("weekly", player.UserId, 9900)
+local crux = Crux.init("<PROJECT_ID>", "<SERVER_TOKEN>", "<ENVIRONMENT_ID>")
+crux:SubmitScore("weekly", player.UserId, 9900)
 ```
 See [`sdks/roblox/README.md`](sdks/roblox/README.md).
 
