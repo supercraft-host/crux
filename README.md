@@ -23,7 +23,7 @@ engine to the Crux HTTP API. All are MIT.
 
 | SDK | Status | Channel | Folder | README |
 |---|---|---|---|---|
-| **JavaScript / TypeScript** | stable | npm: [`@supercraft/gsb`](https://www.npmjs.com/package/@supercraft/gsb) | [`sdks/js/`](sdks/js/) | [`sdks/js/README.md`](sdks/js/README.md) |
+| **JavaScript / TypeScript** | stable | npm: [`crux-sdk`](https://www.npmjs.com/package/crux-sdk) | [`sdks/js/`](sdks/js/) | [`sdks/js/README.md`](sdks/js/README.md) |
 | **Godot 4** | stable | Godot Asset Library | [`sdks/godot/`](sdks/godot/) | [`sdks/godot/README.md`](sdks/godot/README.md) |
 | **Unity** | stable | UPM (Git URL) + Asset Store | [`sdks/unity/`](sdks/unity/) | [`sdks/unity/README.md`](sdks/unity/README.md) |
 | **Roblox (Luau)** | stable | Wally + Toolbox | [`sdks/roblox/`](sdks/roblox/) | [`sdks/roblox/README.md`](sdks/roblox/README.md) |
@@ -101,7 +101,7 @@ gsb-sdks/
 ├── openapi/
 │   └── v1.yaml           OpenAPI 3.0.3 spec - the source of truth
 ├── sdks/
-│   ├── js/               TypeScript SDK (`@supercraft/gsb`)
+│   ├── js/               TypeScript SDK (`crux-sdk`)
 │   ├── godot/            Godot 4 GDScript addon
 │   ├── unity/            Unity UPM package (`host.supercraft.gsb`)
 │   └── roblox/           Roblox Luau module
@@ -119,18 +119,18 @@ gsb-sdks/
 Five-minute integrations, in their natural form for each engine. Each
 points at the SDK's own README for the full surface.
 
-### Browser / Node.js - `@supercraft/gsb`
+### Browser / Node.js - `crux-sdk`
 
 ```bash
-npm install @supercraft/gsb
+npm install crux-sdk
 ```
 
 ```ts
-import { GSBClient } from "@supercraft/gsb";
+import { CruxClient } from "crux-sdk";
 
-const gsb = GSBClient.forPlayer(
+const gsb = CruxClient.forPlayer(
   "https://crux.supercraft.host",
-  "proj_xxx", "env_xxx", "gsb_apikey_xxx"
+  "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>"
 );
 const auth = await gsb.loginAnonymous();
 await gsb.submitScore("weekly", auth.player_id, 9900);
@@ -141,7 +141,7 @@ See [`sdks/js/README.md`](sdks/js/README.md).
 ### Godot 4 - drop-in addon
 
 ```gdscript
-Crux.init_player("https://crux.supercraft.host", "proj_xxx", "env_xxx", "gsb_apikey_xxx")
+Crux.init_player("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>")
 var auth = await Crux.login_anonymous()
 await Crux.submit_score("weekly", auth.player_id, 9900.0)
 ```
@@ -154,8 +154,8 @@ git+https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.superc
 ```
 
 ```csharp
-var gsb = GSBClient.ForPlayer(
-    "https://crux.supercraft.host", "proj_xxx", "env_xxx", "gsb_apikey_xxx");
+var gsb = CruxClient.ForPlayer(
+    "https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>");
 var auth = await gsb.LoginAnonymousAsync();
 await gsb.SubmitScoreAsync("weekly", auth.player_id, 9900);
 ```
@@ -165,7 +165,7 @@ See [`sdks/unity/README.md`](sdks/unity/README.md).
 
 ```lua
 local Crux = require(game.ServerScriptService.Crux)
-local gsb = Crux.init("proj_xxx", "gsb_servertoken_xxx", "env_xxx")
+local gsb = Crux.init("<PROJECT_ID>", "<SERVER_TOKEN>", "<ENVIRONMENT_ID>")
 gsb:SubmitScore("weekly", player.UserId, 9900)
 ```
 See [`sdks/roblox/README.md`](sdks/roblox/README.md).

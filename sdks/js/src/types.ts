@@ -1,6 +1,6 @@
 // ── Options ──────────────────────────────────────────────────────────────────
 
-export interface GSBOptions {
+export interface CruxOptions {
   baseUrl:       string;
   projectId:     string;
   environmentId: string;
@@ -152,12 +152,12 @@ export interface ServerInfo {
 
 // ── Errors ────────────────────────────────────────────────────────────────────
 
-export class GSBError extends Error {
+export class CruxError extends Error {
   constructor(
     public readonly statusCode: number,
     message: string,
   ) {
     super(message);
-    this.name = "GSBError";
+    this.name = "CruxError";
   }
 }

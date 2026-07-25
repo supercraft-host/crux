@@ -30,7 +30,7 @@ npm run build     # tsc → dist/
 ### Godot
 
 Open the SDK in Godot 4.1+ as a standalone project (the addon under
-`sdks/godot/addons/gsb/`). There's no Godot CI today - changes are
+`sdks/godot/addons/crux/`). There's no Godot CI today - changes are
 manually smoke-tested against a local Crux.
 
 ### Unity
@@ -50,8 +50,8 @@ local Studio session. No Roblox CI today.
 - [ ] If JS: `npm test` passes locally.
 - [ ] SDK README updated if the public surface changed.
 - [ ] SDK CHANGELOG has an "Unreleased" entry describing the change.
-- [ ] No secrets or per-tenant data in any file (search for `gsb_apikey_`,
-      `gsb_servertoken_`, `Bearer`).
+- [ ] No secrets or per-tenant data in any file (search for `<API_KEY>`,
+      `<SERVER_TOKEN>`, `Bearer`).
 
 ## Adding a new language
 
@@ -82,7 +82,7 @@ Maintainers only. Each SDK has its own release cadence:
 
 - **JS** - `npm publish` from `sdks/js/`, tag `v<sdk>/<semver>` e.g.
   `v-js/1.1.0`.
-- **Godot** - bump `version` in `addons/gsb/plugin.cfg`, tag
+- **Godot** - bump `version` in `addons/crux/plugin.cfg`, tag
   `v-godot/<semver>`, submit to Godot Asset Library.
 - **Unity** - bump `version` in `Packages/host.supercraft.sdk/package.json`,
   tag `v-unity/<semver>`.

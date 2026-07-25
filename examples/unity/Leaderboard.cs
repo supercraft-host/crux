@@ -9,16 +9,16 @@ using UnityEngine;
 public class Leaderboard : MonoBehaviour
 {
     [SerializeField] private string baseUrl       = "https://crux.supercraft.host";
-    [SerializeField] private string projectId     = "proj_xxx";
-    [SerializeField] private string environmentId = "env_xxx";
-    [SerializeField] private string apiKey        = "gsb_apikey_xxx";
+    [SerializeField] private string projectId     = "<PROJECT_ID>";
+    [SerializeField] private string environmentId = "<ENVIRONMENT_ID>";
+    [SerializeField] private string apiKey        = "<API_KEY>";
     [SerializeField] private string leaderboardId = "weekly";
 
     private async void Start()
     {
         try
         {
-            var gsb = GSBClient.ForPlayer(baseUrl, projectId, environmentId, apiKey);
+            var gsb = CruxClient.ForPlayer(baseUrl, projectId, environmentId, apiKey);
 
             var auth = await gsb.LoginAnonymousAsync();
             Debug.Log($"logged in as {auth.player_id}");

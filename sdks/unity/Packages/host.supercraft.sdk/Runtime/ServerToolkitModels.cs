@@ -3,9 +3,9 @@ using System;
 namespace Supercraft.Crux
 {
     [Serializable]
-    public sealed class GSBOptions
+    public sealed class ServerToolkitOptions
     {
-        public string BaseUrl       = "https://api.gsb.dev";
+        public string BaseUrl       = "https://crux.supercraft.host";
         public string ProjectId;
         public string EnvironmentId;
         /// <summary>Server token - for dedicated game servers.</summary>

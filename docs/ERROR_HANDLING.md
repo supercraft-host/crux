@@ -36,7 +36,7 @@ retry loop; investigate the cause.
 ### JavaScript
 
 ```ts
-import { GSBClient, GSBError } from "@supercraft/gsb";
+import { CruxClient, GSBError } from "crux-sdk";
 
 try {
   await gsb.getPlayerDocument(playerId, "inventory");

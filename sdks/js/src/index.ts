@@ -1,8 +1,9 @@
 export * from "./types.js";
+export * from "./worldpack.js";
 
 import {
-  GSBOptions,
-  GSBError,
+  CruxOptions,
+  CruxError,
   AuthResult,
   PlayerDocument,
   DocumentWrite,
@@ -23,22 +24,25 @@ import {
  *
  * **Server mode** (Node.js game server / trusted backend):
  * ```ts
- * const gsb = GSBClient.forServer("https://api.gsb.dev", "proj_...", "env_...", "gsb_servertoken_...");
+ * const gsb = CruxClient.forServer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>");
  * ```
  *
  * **Player mode** (browser or game client):
  * ```ts
- * const gsb = GSBClient.forPlayer("https://api.gsb.dev", "proj_...", "env_...", "gsb_apikey_...");
+ * const gsb = CruxClient.forPlayer("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>");
  * const auth = await gsb.loginAnonymous();
  * ```
+ *
+ * PROJECT_ID and ENVIRONMENT_ID are UUIDs; API_KEY / SERVER_TOKEN are the secret
+ * strings issued on the Credentials page of the Crux dashboard.
  */
-export class GSBClient {
-  private readonly opts: Required<GSBOptions>;
+export class CruxClient {
+  private readonly opts: Required<CruxOptions>;
   private playerToken:  string = "";
   private refreshToken: string = "";
   public  playerId:     string = "";
 
-  private constructor(opts: GSBOptions) {
+  private constructor(opts: CruxOptions) {
     this.opts = {
       baseUrl:       opts.baseUrl.replace(/\/$/, ""),
       projectId:     opts.projectId,
@@ -50,18 +54,20 @@ export class GSBClient {
     };
   }
 
-  static forServer(baseUrl: string, projectId: string, environmentId: string, serverToken: string): GSBClient {
-    return new GSBClient({ baseUrl, projectId, environmentId, serverToken });
+  static forServer(baseUrl: string, projectId: string, environmentId: string, serverToken: string): CruxClient {
+    return new CruxClient({ baseUrl, projectId, environmentId, serverToken });
   }
 
-  static forPlayer(baseUrl: string, projectId: string, environmentId: string, apiKey: string): GSBClient {
-    return new GSBClient({ baseUrl, projectId, environmentId, apiKey });
+  static forPlayer(baseUrl: string, projectId: string, environmentId: string, apiKey: string): CruxClient {
+    return new CruxClient({ baseUrl, projectId, environmentId, apiKey });
   }
 
   // ── Auth ───────────────────────────────────────────────────────────────────
 
-  async loginAnonymous(): Promise<AuthResult> {
-    return this.authRequest("/v1/auth/anonymous", {});
+  async loginAnonymous(anonymousId?: string): Promise<AuthResult> {
+    const id = anonymousId ?? ((globalThis as any).crypto?.randomUUID?.()
+      ?? ("anon-" + Date.now().toString(36) + Math.random().toString(36).slice(2)));
+    return this.authRequest("/v1/auth/anonymous", { anonymous_id: id });
   }
 
   async loginEmail(email: string, password: string): Promise<AuthResult> {
@@ -73,7 +79,7 @@ export class GSBClient {
   }
 
   async refreshAccessToken(): Promise<AuthResult> {
-    if (!this.refreshToken) throw new GSBError(0, "No refresh token - call a login method first.");
+    if (!this.refreshToken) throw new CruxError(0, "No refresh token - call a login method first.");
     return this.authRequest("/v1/auth/refresh", { refresh_token: this.refreshToken });
   }
 
@@ -148,7 +154,7 @@ export class GSBClient {
         "GET", this.env(`/leaderboards/${enc(leaderboardId)}/players/${enc(playerId)}`), null, this.runtimeAuth(),
       );
     } catch (e) {
-      if (e instanceof GSBError && e.statusCode === 404) return null;
+      if (e instanceof CruxError && e.statusCode === 404) return null;
       throw e;
     }
   }
@@ -219,7 +225,7 @@ export class GSBClient {
       headers: { Authorization: this.runtimeAuth() },
       signal: AbortSignal.timeout(this.opts.timeoutMs),
     });
-    if (!resp.ok) throw new GSBError(resp.status, `Crux ${resp.status} downloading config bundle`);
+    if (!resp.ok) throw new CruxError(resp.status, `Crux ${resp.status} downloading config bundle`);
     return resp.arrayBuffer();
   }
 
@@ -232,12 +238,12 @@ export class GSBClient {
   private runtimeAuth(): string {
     if (this.opts.serverToken) return "ServerToken " + this.opts.serverToken;
     if (this.playerToken)      return "Bearer "      + this.playerToken;
-    throw new GSBError(0, "Crux: no server token or player token - call forServer() or a login method first.");
+    throw new CruxError(0, "Crux: no server token or player token - call forServer() or a login method first.");
   }
 
   private serverAuth(): string {
     if (this.opts.serverToken) return "ServerToken " + this.opts.serverToken;
-    throw new GSBError(0, "Crux: server token required - use GSBClient.forServer(...).");
+    throw new CruxError(0, "Crux: server token required - use CruxClient.forServer(...).");
   }
 
   private async send<T = unknown>(
@@ -285,14 +291,14 @@ export class GSBClient {
       if (!resp.ok) {
         let message = text;
         try { message = JSON.parse(text)?.message ?? text; } catch { /* ignore */ }
-        throw new GSBError(resp.status, `Crux ${resp.status} ${method} ${path}: ${message}`);
+        throw new CruxError(resp.status, `Crux ${resp.status} ${method} ${path}: ${message}`);
       }
 
       if (!text) return {} as T;
       return JSON.parse(text) as T;
     }
 
-    throw lastError ?? new GSBError(0, "Crux: max retries exceeded");
+    throw lastError ?? new CruxError(0, "Crux: max retries exceeded");
   }
 }
 
@@ -311,3 +317,13 @@ function buildQuery(params: Record<string, string | undefined>): string {
   }
   return parts.length ? "?" + parts.join("&") : "";
 }
+
+// ── Deprecated back-compat aliases (Crux* → Crux*, renamed in v0.2.0) ───────────
+// Kept so existing imports keep working. Prefer the Crux* names in new code.
+
+/** @deprecated Renamed to {@link CruxClient}. */
+export const CruxClient = CruxClient;
+/** @deprecated Renamed to {@link CruxOptions}. */
+export type GSBOptions = CruxOptions;
+/** @deprecated Renamed to {@link CruxError}. */
+export { CruxError as GSBError };

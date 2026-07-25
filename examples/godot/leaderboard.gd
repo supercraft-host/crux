@@ -7,9 +7,9 @@
 extends Node
 
 const URL          := "https://crux.supercraft.host"
-const PROJECT_ID   := "proj_xxx"
-const ENV_ID       := "env_xxx"
-const API_KEY      := "gsb_apikey_xxx"
+const PROJECT_ID   := "<PROJECT_ID>"
+const ENV_ID       := "<ENVIRONMENT_ID>"
+const API_KEY      := "<API_KEY>"
 const LEADERBOARD  := "weekly"
 
 func _ready() -> void:

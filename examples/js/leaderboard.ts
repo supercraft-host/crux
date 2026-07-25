@@ -2,21 +2,21 @@
  * Weekly leaderboard, end-to-end.
  *
  * Run:
- *   npm install @supercraft/gsb tsx
- *   GSB_URL=https://crux.supercraft.host \
- *   GSB_PROJECT=proj_xxx GSB_ENV=env_xxx GSB_KEY=gsb_apikey_xxx \
+ *   npm install crux-sdk tsx
+ *   CRUX_URL=https://crux.supercraft.host \
+ *   CRUX_PROJECT=<PROJECT_ID> CRUX_ENV=<ENVIRONMENT_ID> CRUX_KEY=<API_KEY> \
  *   tsx examples/js/leaderboard.ts
  */
-import { GSBClient } from "@supercraft/gsb";
+import { CruxClient } from "crux-sdk";
 
-const url        = process.env.GSB_URL     ?? "https://crux.supercraft.host";
-const projectId  = process.env.GSB_PROJECT ?? "proj_xxx";
-const envId      = process.env.GSB_ENV     ?? "env_xxx";
-const apiKey     = process.env.GSB_KEY     ?? "gsb_apikey_xxx";
+const url        = process.env.CRUX_URL     ?? "https://crux.supercraft.host";
+const projectId  = process.env.CRUX_PROJECT ?? "<PROJECT_ID>";
+const envId      = process.env.CRUX_ENV     ?? "<ENVIRONMENT_ID>";
+const apiKey     = process.env.CRUX_KEY     ?? "<API_KEY>";
 const leaderboard = "weekly";
 
 async function main() {
-  const gsb = GSBClient.forPlayer(url, projectId, envId, apiKey);
+  const gsb = CruxClient.forPlayer(url, projectId, envId, apiKey);
 
   const auth = await gsb.loginAnonymous();
   console.log(`logged in as ${auth.player_id}`);

@@ -59,7 +59,7 @@ sdks/<name>/
 ```
 
 JS uses standard `src/` + `tests/` + `package.json`. Godot keeps the
-`addons/gsb/` shape Godot Asset Library expects. Unity keeps the UPM
+`addons/crux/` shape Godot Asset Library expects. Unity keeps the UPM
 package shape (`Packages/host.supercraft.sdk/`). Roblox is one file
 (`Crux.lua`) plus a `wally.toml` so Wally picks it up.
 
@@ -115,11 +115,11 @@ doesn't care; UPM Git URL takes a `?path=` query string).
 We mitigate the discoverability cost by:
 
 - npm `package.json` is in `sdks/js/`, publishable as
-  `@supercraft/gsb` - npm doesn't care it's in a subfolder.
+  `crux-sdk` - npm doesn't care it's in a subfolder.
 - Unity UPM uses the Git URL path query:
   `git+https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.supercraft.sdk`.
 - Godot Asset Library accepts a `subfolder` field on submission; we
-  point at `sdks/godot/addons/gsb/`.
+  point at `sdks/godot/addons/crux/`.
 - Wally takes a `path` in `wally.toml`; we point at `sdks/roblox/`.
 
 If discoverability ever becomes a real problem, we'll split per-SDK

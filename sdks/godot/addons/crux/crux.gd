@@ -1,13 +1,16 @@
-## Crux - Crux SDK for Godot 4
+## Crux - Supercraft Game Services Backend SDK for Godot 4
 ##
 ## Add as an Autoload (Project → Project Settings → Autoload) for global access,
 ## or instantiate manually and add_child() it to a node in your scene.
 ##
 ## Usage (server mode - dedicated game server):
-##   Crux.init_server("https://api.gsb.dev", "proj_...", "env_...", "gsb_servertoken_...")
+##   Crux.init_server("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>")
 ##
 ## Usage (player mode - game client):
-##   Crux.init_player("https://api.gsb.dev", "proj_...", "env_...", "gsb_apikey_...")
+##   Crux.init_player("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>")
+##
+## PROJECT_ID and ENVIRONMENT_ID are UUIDs; API_KEY / SERVER_TOKEN are the secret
+## strings issued on the Credentials page of your Crux dashboard.
 ##   var auth = await Crux.login_anonymous()
 ##   var doc  = await Crux.get_player_document(auth.player_id, "inventory")
 
@@ -16,7 +19,7 @@ extends Node
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-var _base_url:      String = "https://api.gsb.dev"
+var _base_url:      String = "https://crux.supercraft.host"
 var _project_id:    String
 var _env_id:        String
 var _server_token:  String
@@ -47,8 +50,11 @@ func init_player(base_url: String, project_id: String, environment_id: String, a
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 ## Anonymous (guest) login. Returns {player_id, access_token, refresh_token, expires_in}.
-func login_anonymous() -> Dictionary:
-	return await _auth_request("/v1/auth/anonymous", {})
+func login_anonymous(anonymous_id: String = "") -> Dictionary:
+	# Persist and reuse anonymous_id to return to the same player across sessions.
+	if anonymous_id == "":
+		anonymous_id = "anon-%d-%d" % [Time.get_unix_time_from_system(), randi()]
+	return await _auth_request("/v1/auth/anonymous", {"anonymous_id": anonymous_id})
 
 
 ## Email + password login.
@@ -118,8 +124,7 @@ func delete_player_document(pid: String, key: String) -> void:
 
 ## Fetch multiple document keys in a single call. Returns Array of documents.
 func batch_get_player_documents(pid: String, keys: Array) -> Array:
-	var result = await _request("POST", _env("/players/%s/documents/batch-read" % pid), {"keys": keys}, _runtime_auth())
-	return result.get("documents", [])
+	return await _request_array("POST", _env("/players/%s/documents/batch-read" % pid), {"keys": keys}, _runtime_auth())
 
 
 ## Write multiple documents atomically.
@@ -138,8 +143,7 @@ func submit_score(leaderboard_id: String, pid: String, score: float, metadata: D
 
 ## Get the top N entries. Returns Array of {rank, player_id, score, metadata}.
 func get_top(leaderboard_id: String, limit: int = 10) -> Array:
-	var result = await _request("GET", _env("/leaderboards/%s/top?limit=%d" % [leaderboard_id, limit]), {}, _runtime_auth())
-	return result.get("entries", [])
+	return await _request_array("GET", _env("/leaderboards/%s/top?limit=%d" % [leaderboard_id, limit]), {}, _runtime_auth())
 
 
 ## Get a player's rank and score. Returns {rank, player_id, score} or empty dict if not ranked.
@@ -149,9 +153,8 @@ func get_player_standing(leaderboard_id: String, pid: String) -> Dictionary:
 
 ## Get entries surrounding a player (radius entries above + below). Returns Array.
 func get_around_player(leaderboard_id: String, pid: String, radius: int = 3) -> Array:
-	var result = await _request("GET",
+	return await _request_array("GET",
 		_env("/leaderboards/%s/players/%s/around?radius=%d" % [leaderboard_id, pid, radius]), {}, _runtime_auth())
-	return result.get("entries", [])
 
 
 # ── Economy ───────────────────────────────────────────────────────────────────
@@ -213,8 +216,7 @@ func deregister_server(server_id: String) -> void:
 ## Returns Array of server Dictionaries.
 func list_servers(region: String = "", map_name: String = "", game_mode: String = "") -> Array:
 	var qs := _build_query({"region": region, "map_name": map_name, "game_mode": game_mode})
-	var result = await _request("GET", _env("/browser" + qs), {}, _runtime_auth())
-	return result.get("servers", [])
+	return await _request_array("GET", _env("/browser" + qs), {}, _runtime_auth())
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -254,7 +256,11 @@ func _build_query(params: Dictionary) -> String:
 	return "?" + "&".join(parts)
 
 
-func _request(method: String, path: String, body: Dictionary, auth_header: String) -> Dictionary:
+# Core HTTP + retry. Returns the parsed JSON body as a Variant - a Dictionary
+# for object responses, an Array for collection responses (leaderboard
+# standings, server browser, batch reads), or {} for an empty body / transport
+# error / HTTP >= 400 (after logging). Callers pick the typed wrapper below.
+func _send(method: String, path: String, body: Dictionary, auth_header: String) -> Variant:
 	var http_method := _method_const(method)
 	var url         := _base_url + path
 	var headers     := PackedStringArray([
@@ -295,10 +301,25 @@ func _request(method: String, path: String, body: Dictionary, auth_header: Strin
 			push_error("Crux: HTTP %d on %s %s - %s" % [response_code, method, path, msg])
 			return {}
 
-		return _parse_json(body_str)
+		return _parse_json_variant(body_str)
 
 	push_error("Crux: max retries exceeded for %s %s" % [method, path])
 	return {}
+
+
+## Request whose response body is a JSON object. Returns {} on error or when the
+## endpoint returns a non-object body.
+func _request(method: String, path: String, body: Dictionary, auth_header: String) -> Dictionary:
+	var result: Variant = await _send(method, path, body, auth_header)
+	return result if result is Dictionary else {}
+
+
+## Request whose response body is a JSON array (leaderboard standings, server
+## browser results, batch document reads). Returns [] on error or when the
+## endpoint returns a non-array body.
+func _request_array(method: String, path: String, body: Dictionary, auth_header: String) -> Array:
+	var result: Variant = await _send(method, path, body, auth_header)
+	return result if result is Array else []
 
 
 func _request_bytes(path: String, auth_header: String) -> PackedByteArray:
@@ -324,6 +345,17 @@ func _parse_json(text: String) -> Dictionary:
 	if parsed is Dictionary:
 		return parsed
 	return {}
+
+
+## Parse a JSON body into whatever it represents (Dictionary or Array). Returns
+## {} for an empty body or a parse failure so callers always get a valid value.
+func _parse_json_variant(text: String) -> Variant:
+	if text.is_empty():
+		return {}
+	var parsed = JSON.parse_string(text)
+	if parsed == null:
+		return {}
+	return parsed
 
 
 func _method_const(method: String) -> int:

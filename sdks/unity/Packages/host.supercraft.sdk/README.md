@@ -1,4 +1,4 @@
-# Crux - Unity SDK
+# Supercraft Crux - Unity SDK
 
 Unity UPM package for [Crux (Game Services Backend)](https://supercraft.dev). Covers player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.
 
@@ -22,11 +22,11 @@ Or via **Package Manager → Add package from disk...** pointing at `host.superc
 using Supercraft.Crux;
 
 // 1. Create client with your project's public API key
-var gsb = GSBClient.ForPlayer(
+var gsb = ServerToolkitClient.ForPlayer(
     baseUrl:       "https://crux.supercraft.host",
-    projectId:     "proj_...",
-    environmentId: "env_...",
-    apiKey:        "gsb_apikey_..."
+    projectId:     "<PROJECT_ID>",
+    environmentId: "<ENVIRONMENT_ID>",
+    apiKey:        "YOUR_API_KEY..."
 );
 
 // 2. Log in (anonymous, email, or OAuth)
@@ -50,11 +50,11 @@ foreach (var e in top)
 ```csharp
 using Supercraft.Crux;
 
-var gsb = GSBClient.ForServer(
+var gsb = ServerToolkitClient.ForServer(
     baseUrl:       "https://crux.supercraft.host",
-    projectId:     "proj_...",
-    environmentId: "env_...",
-    serverToken:   "gsb_servertoken_..."
+    projectId:     "<PROJECT_ID>",
+    environmentId: "<ENVIRONMENT_ID>",
+    serverToken:   "YOUR_SERVER_TOKEN..."
 );
 
 // Register this server instance

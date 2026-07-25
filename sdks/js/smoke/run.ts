@@ -5,14 +5,14 @@
 // on success, non-zero on failure. Each step prints a one-line status so a CI
 // log makes the failure obvious.
 //
-//   GSB_BASE_URL, GSB_PROJECT_ID, GSB_ENV_ID, GSB_API_KEY
+//   CRUX_BASE_URL, CRUX_PROJECT_ID, CRUX_ENV_ID, CRUX_API_KEY
 //
 // The smoke test creates a short-lived anonymous player, writes/reads/patches
 // a document, then removes the doc. The player row stays (anonymous players
 // are rarely deleted by design), so reruns are idempotent because the
 // anonymous_id is randomized per invocation.
 
-import { GSBClient, GSBError } from "../src/index.js";
+import { CruxClient, CruxError } from "../src/index.js";
 
 function env(name: string, fallback?: string): string {
   const v = process.env[name] ?? fallback;
@@ -23,13 +23,13 @@ function env(name: string, fallback?: string): string {
   return v;
 }
 
-const BASE_URL   = env("GSB_BASE_URL", "https://gsb.test.supercraft.host");
-const PROJECT_ID = env("GSB_PROJECT_ID");
-const ENV_ID     = env("GSB_ENV_ID");
-const API_KEY    = env("GSB_API_KEY");
+const BASE_URL   = env("CRUX_BASE_URL", "https://gsb.test.supercraft.host");
+const PROJECT_ID = env("CRUX_PROJECT_ID");
+const ENV_ID     = env("CRUX_ENV_ID");
+const API_KEY    = env("CRUX_API_KEY");
 
 const run = async () => {
-  const gsb = GSBClient.forPlayer(BASE_URL, PROJECT_ID, ENV_ID, API_KEY);
+  const gsb = CruxClient.forPlayer(BASE_URL, PROJECT_ID, ENV_ID, API_KEY);
 
   const anonId = `smoke-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   // Anonymous login is the only path that doesn't need a pre-existing user;
@@ -70,7 +70,7 @@ const run = async () => {
   try {
     await gsb.setPlayerDocument(auth.player_id, DOC, { xp: 999 }, initial.version);
   } catch (e) {
-    if (e instanceof GSBError && e.statusCode === 409) conflicted = true;
+    if (e instanceof CruxError && e.statusCode === 409) conflicted = true;
     else throw e;
   }
   if (!conflicted) throw new Error("expected 409 on stale-version write");

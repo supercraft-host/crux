@@ -11,14 +11,14 @@
 
     Usage (Server Script):
         local Crux = require(game.ServerScriptService.Crux)
-        local gsb = Crux.init("YOUR_PROJECT_ID", "YOUR_SERVER_TOKEN", "YOUR_ENV_ID")
+        local crux = Crux.init("YOUR_PROJECT_ID", "YOUR_SERVER_TOKEN", "YOUR_ENV_ID")
 ]]
 
 local Crux = {}
 Crux.__index = Crux
 
 local HttpService = game:GetService("HttpService")
-local BASE_URL = "https://api.gsb.dev/v1"
+local BASE_URL = "https://crux.supercraft.host/v1"
 
 -- Retry policy
 local MAX_RETRIES = 3

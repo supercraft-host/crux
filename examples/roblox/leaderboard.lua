@@ -5,9 +5,9 @@
 
 local Crux = require(game.ServerScriptService.Crux)
 
-local PROJECT_ID    = "proj_xxx"
-local SERVER_TOKEN  = "gsb_servertoken_xxx"
-local ENVIRONMENT   = "env_xxx"
+local PROJECT_ID    = "<PROJECT_ID>"
+local SERVER_TOKEN  = "<SERVER_TOKEN>"
+local ENVIRONMENT   = "<ENVIRONMENT_ID>"
 local LEADERBOARD   = "weekly"
 
 local gsb = Crux.init(PROJECT_ID, SERVER_TOKEN, ENVIRONMENT)

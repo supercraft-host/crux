@@ -14,18 +14,18 @@ namespace Supercraft.Crux
     ///   <item><see cref="ForPlayer"/> - game client, uses an API key for auth then stores the player JWT internally.</item>
     /// </list>
     /// </summary>
-    public sealed class GSBClient
+    public sealed class ServerToolkitClient
     {
-        private readonly GSBOptions _opts;
+        private readonly ServerToolkitOptions _opts;
         private string _playerToken;
         private string _refreshToken;
 
         public string PlayerId { get; private set; }
 
-        private GSBClient(GSBOptions opts) => _opts = opts;
+        private ServerToolkitClient(ServerToolkitOptions opts) => _opts = opts;
 
-        public static GSBClient ForServer(string baseUrl, string projectId, string environmentId, string serverToken)
-            => new GSBClient(new GSBOptions
+        public static ServerToolkitClient ForServer(string baseUrl, string projectId, string environmentId, string serverToken)
+            => new ServerToolkitClient(new ServerToolkitOptions
             {
                 BaseUrl       = baseUrl,
                 ProjectId     = projectId,
@@ -33,8 +33,8 @@ namespace Supercraft.Crux
                 ServerToken   = serverToken,
             });
 
-        public static GSBClient ForPlayer(string baseUrl, string projectId, string environmentId, string apiKey)
-            => new GSBClient(new GSBOptions
+        public static ServerToolkitClient ForPlayer(string baseUrl, string projectId, string environmentId, string apiKey)
+            => new ServerToolkitClient(new ServerToolkitOptions
             {
                 BaseUrl       = baseUrl,
                 ProjectId     = projectId,
@@ -253,7 +253,7 @@ namespace Supercraft.Crux
         private string ServerAuth()
         {
             if (!string.IsNullOrEmpty(_opts.ServerToken)) return "ServerToken " + _opts.ServerToken;
-            throw new InvalidOperationException("Crux: server token required. Use GSBClient.ForServer(...).");
+            throw new InvalidOperationException("Crux: server token required. Use ServerToolkitClient.ForServer(...).");
         }
 
         private string EnvPath(string suffix)
@@ -294,13 +294,13 @@ namespace Supercraft.Crux
                         backoff *= 2;
                         continue;
                     }
-                    throw new GSBException((int)req.responseCode, lastError);
+                    throw new ServerToolkitException((int)req.responseCode, lastError);
                 }
 
                 return req.downloadHandler.text;
             }
 
-            throw new GSBException(0, lastError);
+            throw new ServerToolkitException(0, lastError);
         }
 
         private async Task SendAsync(string method, string path, string jsonBody, string authHeader, CancellationToken ct)
@@ -317,7 +317,7 @@ namespace Supercraft.Crux
                 await Task.Yield();
             }
             if (req.result != UnityWebRequest.Result.Success)
-                throw new GSBException((int)req.responseCode, req.error);
+                throw new ServerToolkitException((int)req.responseCode, req.error);
             return req.downloadHandler.data;
         }
 
@@ -509,9 +509,9 @@ namespace Supercraft.Crux
         private static string Esc(string s)     => UnityWebRequest.EscapeURL(s ?? "");
     }
 
-    public sealed class GSBException : Exception
+    public sealed class ServerToolkitException : Exception
     {
         public int StatusCode { get; }
-        public GSBException(int statusCode, string message) : base(message) => StatusCode = statusCode;
+        public ServerToolkitException(int statusCode, string message) : base(message) => StatusCode = statusCode;
     }
 }

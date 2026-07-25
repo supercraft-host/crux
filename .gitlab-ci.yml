@@ -50,4 +50,4 @@ openapi-lint:
   allow_failure: true
 
 # Godot / Unity / Roblox — no headless CI today; manual smoke-tests against
-# a local GSB. Keep README "Tested via" instructions accurate when changing.
+# a local Crux. Keep README "Tested via" instructions accurate when changing.

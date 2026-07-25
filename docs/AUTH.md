@@ -7,8 +7,8 @@ three; the differences are only in how the values are passed at init.
 
 | Mode | Header | Used by | Carries |
 |---|---|---|---|
-| **API key** | `Authorization: ApiKey gsb_apikey_…` | game clients (player-side) | project + environment identity |
-| **Server token** | `Authorization: ServerToken gsb_servertoken_…` | dedicated game servers, your backend | project authority (full access) |
+| **API key** | `Authorization: ApiKey <API_KEY>` | game clients (player-side) | project + environment identity |
+| **Server token** | `Authorization: ServerToken <SERVER_TOKEN>` | dedicated game servers, your backend | project authority (full access) |
 | **Player JWT** | `Authorization: Bearer eyJ…` | game clients, after login | a specific player's identity |
 
 In typical use:
@@ -71,8 +71,8 @@ for the architectural picture.
 ### JavaScript
 
 ```ts
-const player = GSBClient.forPlayer(baseUrl, projectId, envId, apiKey);
-const server = GSBClient.forServer(baseUrl, projectId, envId, serverToken);
+const player = CruxClient.forPlayer(baseUrl, projectId, envId, apiKey);
+const server = CruxClient.forServer(baseUrl, projectId, envId, serverToken);
 ```
 
 ### Godot
@@ -85,8 +85,8 @@ Crux.init_server(base_url, project_id, env_id, server_token)
 ### Unity
 
 ```csharp
-var player = GSBClient.ForPlayer(baseUrl, projectId, envId, apiKey);
-var server = GSBClient.ForServer(baseUrl, projectId, envId, serverToken);
+var player = CruxClient.ForPlayer(baseUrl, projectId, envId, apiKey);
+var server = CruxClient.ForServer(baseUrl, projectId, envId, serverToken);
 ```
 
 ### Roblox (server-only)
