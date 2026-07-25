@@ -103,7 +103,7 @@ gsb-sdks/
 ├── sdks/
 │   ├── js/               TypeScript SDK (`crux-sdk`)
 │   ├── godot/            Godot 4 GDScript addon
-│   ├── unity/            Unity UPM package (`host.supercraft.gsb`)
+│   ├── unity/            Unity UPM package (`host.supercraft.crux`)
 │   └── roblox/           Roblox Luau module
 └── examples/
     ├── js/leaderboard.ts
@@ -150,7 +150,7 @@ See [`sdks/godot/README.md`](sdks/godot/README.md).
 ### Unity - UPM via Git URL
 
 ```
-git+https://gitlab.com/supercraft1/crux.git?path=sdks/unity/Packages/host.supercraft.sdk
+git+https://github.com/supercraft-host/crux.git?path=sdks/unity/Packages/host.supercraft.sdk
 ```
 
 ```csharp

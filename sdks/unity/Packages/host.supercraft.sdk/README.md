@@ -9,7 +9,7 @@ Add to your project's `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "host.supercraft.gsb": "file:../../sdk-unity/Packages/host.supercraft.sdk"
+    "host.supercraft.crux": "file:../../sdk-unity/Packages/host.supercraft.sdk"
   }
 }
 ```
@@ -22,7 +22,7 @@ Or via **Package Manager → Add package from disk...** pointing at `host.superc
 using Supercraft.Crux;
 
 // 1. Create client with your project's public API key
-var gsb = ServerToolkitClient.ForPlayer(
+var crux = ServerToolkitClient.ForPlayer(
     baseUrl:       "https://crux.supercraft.host",
     projectId:     "<PROJECT_ID>",
     environmentId: "<ENVIRONMENT_ID>",
@@ -30,17 +30,17 @@ var gsb = ServerToolkitClient.ForPlayer(
 );
 
 // 2. Log in (anonymous, email, or OAuth)
-var auth = await gsb.LoginAnonymousAsync();
+var auth = await crux.LoginAnonymousAsync();
 Debug.Log($"Player: {auth.player_id}");
 
 // 3. Save player data (arbitrary JSON)
-await gsb.SetPlayerDocumentAsync(auth.player_id, "profile", "{\"name\":\"Ada\",\"level\":5}");
+await crux.SetPlayerDocumentAsync(auth.player_id, "profile", "{\"name\":\"Ada\",\"level\":5}");
 
 // 4. Submit a leaderboard score
-await gsb.SubmitScoreAsync("global-score", auth.player_id, 1234);
+await crux.SubmitScoreAsync("global-score", auth.player_id, 1234);
 
 // 5. Get top 10
-var top = await gsb.GetTopAsync("global-score", 10);
+var top = await crux.GetTopAsync("global-score", 10);
 foreach (var e in top)
     Debug.Log($"#{e.rank} {e.player_id}: {e.score}");
 ```
@@ -50,7 +50,7 @@ foreach (var e in top)
 ```csharp
 using Supercraft.Crux;
 
-var gsb = ServerToolkitClient.ForServer(
+var crux = ServerToolkitClient.ForServer(
     baseUrl:       "https://crux.supercraft.host",
     projectId:     "<PROJECT_ID>",
     environmentId: "<ENVIRONMENT_ID>",
@@ -58,7 +58,7 @@ var gsb = ServerToolkitClient.ForServer(
 );
 
 // Register this server instance
-var server = await gsb.RegisterServerAsync(new ServerRegistration
+var server = await crux.RegisterServerAsync(new ServerRegistration
 {
     server_id    = "my-server-01",
     name         = "Deathmatch EU #1",
@@ -72,10 +72,10 @@ var server = await gsb.RegisterServerAsync(new ServerRegistration
 });
 
 // Heartbeat loop (call every 30s)
-await gsb.HeartbeatAsync(server.server_id);
+await crux.HeartbeatAsync(server.server_id);
 
 // Read a player document server-authoritatively
-var doc = await gsb.GetPlayerDocumentAsync("player-uuid", "inventory");
+var doc = await crux.GetPlayerDocumentAsync("player-uuid", "inventory");
 Debug.Log(doc.raw_value); // raw JSON string
 ```
 

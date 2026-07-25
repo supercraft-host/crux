@@ -1,5 +1,5 @@
 {
-  "name": "host.supercraft.gsb",
+  "name": "host.supercraft.crux",
   "version": "1.0.0",
   "displayName": "Supercraft Crux SDK",
   "description": "Unity SDK for Crux (Game Services Backend): player auth, documents, leaderboards, economy, matchmaking, server registry, and config delivery.",
