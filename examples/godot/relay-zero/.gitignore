@@ -1,0 +1,45 @@
+# Godot
+.godot/
+*.import
+*.translation
+*.tmp
+*.bak
+
+# Build outputs
+export/
+build/
+*.pck
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.env
+.env.*
+!.env.example
+client_config.cfg
+server_config.cfg
+!client/boot/client_config.cfg
+!server/server_config.cfg
+*token*
+*secret*
+*key.pem
+
+# Python
+__pycache__/
+*.py[cod]
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# User data (generated at runtime)
+user://

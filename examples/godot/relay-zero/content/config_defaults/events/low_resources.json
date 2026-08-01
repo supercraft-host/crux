@@ -1,0 +1,7 @@
+{
+  "id": "low_resources",
+  "name": "Low Resources",
+  "item_drop_rate": 0.5,
+  "reward_multiplier": 1.15,
+  "visibility": 0.9
+}

@@ -1,0 +1,7 @@
+{
+  "id": "overclock",
+  "name": "Overclock",
+  "enemy_speed": 1.4,
+  "reward_multiplier": 1.5,
+  "visibility": 0.8
+}

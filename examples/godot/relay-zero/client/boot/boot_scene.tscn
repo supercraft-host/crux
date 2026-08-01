@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bootscenerelayzero"]
+
+[ext_resource type="Script" path="res://client/boot/boot_scene.gd" id="1_script"]
+
+[node name="BootScene" type="Node2D"]
+script = ExtResource("1_script")

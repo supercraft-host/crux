@@ -1,0 +1,7 @@
+{
+  "id": "blackout",
+  "name": "Blackout Protocol",
+  "visibility": 0.55,
+  "enemy_speed": 1.1,
+  "reward_multiplier": 1.25
+}

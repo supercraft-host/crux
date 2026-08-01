@@ -1,0 +1,7 @@
+{
+  "id": "reinforcements",
+  "name": "Reinforcements",
+  "enemy_spawn_rate": 2.0,
+  "reward_multiplier": 1.35,
+  "visibility": 1.0
+}

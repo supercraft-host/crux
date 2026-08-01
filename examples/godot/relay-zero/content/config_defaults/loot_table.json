@@ -1,0 +1,43 @@
+{
+  "common": [
+    {
+      "item": "signal",
+      "amount": 10,
+      "weight": 40
+    },
+    {
+      "item": "health_kit",
+      "amount": 1,
+      "weight": 15
+    }
+  ],
+  "rare": [
+    {
+      "item": "signal",
+      "amount": 50,
+      "weight": 30
+    },
+    {
+      "item": "signal_booster",
+      "amount": 1,
+      "weight": 10
+    },
+    {
+      "item": "speed_stim",
+      "amount": 1,
+      "weight": 8
+    }
+  ],
+  "elite": [
+    {
+      "item": "signal",
+      "amount": 150,
+      "weight": 25
+    },
+    {
+      "item": "revive_token",
+      "amount": 1,
+      "weight": 10
+    }
+  ]
+}

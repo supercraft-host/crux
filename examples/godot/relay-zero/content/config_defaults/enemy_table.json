@@ -1,0 +1,58 @@
+{
+  "common": {
+    "hp": 60,
+    "speed": 120,
+    "damage": 10,
+    "xp": 10,
+    "signal": 5
+  },
+  "fast": {
+    "hp": 40,
+    "speed": 220,
+    "damage": 8,
+    "xp": 15,
+    "signal": 8
+  },
+  "heavy": {
+    "hp": 200,
+    "speed": 80,
+    "damage": 25,
+    "xp": 30,
+    "signal": 20
+  },
+  "artillery": {
+    "hp": 80,
+    "speed": 40,
+    "damage": 20,
+    "xp": 20,
+    "signal": 15
+  },
+  "shielder": {
+    "hp": 120,
+    "speed": 100,
+    "damage": 12,
+    "xp": 25,
+    "signal": 18
+  },
+  "swarm": {
+    "hp": 25,
+    "speed": 180,
+    "damage": 5,
+    "xp": 5,
+    "signal": 3
+  },
+  "elite_assassin": {
+    "hp": 350,
+    "speed": 160,
+    "damage": 40,
+    "xp": 80,
+    "signal": 50
+  },
+  "elite_juggernaut": {
+    "hp": 600,
+    "speed": 60,
+    "damage": 50,
+    "xp": 100,
+    "signal": 75
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "version": "demo-0.1.0",
+  "description": "Relay Zero default configuration",
+  "created_at": "2026-08-01T00:00:00Z",
+  "files": [
+    "balance.json",
+    "enemy_table.json",
+    "loot_table.json",
+    "daily_event.json",
+    "map_rotation.json"
+  ],
+  "leaderboards": {
+    "weekly_recovery_score": "44d35a93-45bb-4d2b-bc7f-f6dfd05d5e03",
+    "fastest_full_extraction": "f465a881-fc06-4647-ba0e-38937f6749f0",
+    "longest_extraction_streak": ""
+  }
+}

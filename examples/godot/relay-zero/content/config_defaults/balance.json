@@ -1,0 +1,13 @@
+{
+  "base_reward_per_core": 50,
+  "extraction_bonus": 100,
+  "team_size_multiplier": [
+    1.0,
+    1.2,
+    1.35,
+    1.5
+  ],
+  "difficulty_weight": 0.15,
+  "time_bonus_max": 50,
+  "time_bonus_per_second": 0.5
+}

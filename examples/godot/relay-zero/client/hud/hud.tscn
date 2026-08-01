@@ -1,0 +1,86 @@
+[gd_scene load_steps=2 format=3 uid="uid://hudrelayzero"]
+
+[ext_resource type="Script" path="res://client/hud/hud.gd" id="1_script"]
+
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="HBoxContainer"]
+custom_minimum_size = Vector2(200, 20)
+layout_mode = 2
+value = 100.0
+
+[node name="SignalLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Signal: 0"
+
+[node name="CoreIndicator" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Cores: 0/3"
+
+[node name="TimerLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "5:00"
+
+[node name="PhaseLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "DEPLOYING"
+
+[node name="ModuleCooldown" type="TextureProgressBar" parent="HBoxContainer"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+value = 100.0
+
+[node name="PressureIndicator" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ObjectiveText" type="Label" parent="MarginContainer"]
+layout_mode = 2
+text = "Locate and activate relay towers."
+horizontal_alignment = 1
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_top = 1.0
+anchor_right = 0.35
+anchor_bottom = 1.0
+offset_top = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="EventLog" type="RichTextLabel" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scroll_following = true

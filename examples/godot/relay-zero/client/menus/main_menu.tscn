@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3 uid="uid://mainmenurelayzero"]
+
+[ext_resource type="Script" path="res://client/menus/main_menu.gd" id="1_script"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -250.0
+offset_right = 200.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "RELAY ZERO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CallsignLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Operator"
+horizontal_alignment = 1
+
+[node name="DailyEventLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Standard conditions"
+horizontal_alignment = 1
+
+[node name="RegionSelector" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ModeSelector" type="OptionButton" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Loadout" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="ModuleSelector" type="OptionButton" parent="VBoxContainer/Loadout"]
+layout_mode = 2
+
+[node name="ConsumableSelector" type="OptionButton" parent="VBoxContainer/Loadout"]
+layout_mode = 2
+
+[node name="Buttons" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="VBoxContainer/Buttons"]
+layout_mode = 2
+text = "PLAY"
+
+[node name="ServerBrowserButton" type="Button" parent="VBoxContainer/Buttons"]
+layout_mode = 2
+text = "Server Browser"
+
+[node name="LoadoutButton" type="Button" parent="VBoxContainer/Buttons"]
+layout_mode = 2
+text = "Loadout"
+
+[node name="LeaderboardButton" type="Button" parent="VBoxContainer/Buttons"]
+layout_mode = 2
+text = "Leaderboards"
+
+[node name="SettingsButton" type="Button" parent="VBoxContainer/Buttons"]
+layout_mode = 2
+text = "Settings"
+
+[node name="DevModeCheckBox" type="CheckBox" parent="VBoxContainer"]
+layout_mode = 2
+text = "Developer Mode"
+
+[node name="SignalLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Signal: ---"
+horizontal_alignment = 1
+
+[node name="VersionLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "v0.1.0"
+horizontal_alignment = 1

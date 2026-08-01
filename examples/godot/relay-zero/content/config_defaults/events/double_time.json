@@ -1,0 +1,7 @@
+{
+  "id": "double_time",
+  "name": "Double Time",
+  "match_time_multiplier": 0.7,
+  "reward_multiplier": 1.4,
+  "visibility": 0.7
+}
