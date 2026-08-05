@@ -35,7 +35,7 @@ manually smoke-tested against a local Crux.
 
 ### Unity
 
-Open `sdks/unity/Packages/host.supercraft.sdk/` as a UPM package in
+Open `sdks/unity/Packages/host.supercraft.crux/` as a UPM package in
 Unity 2021.3 LTS or newer. There's no Unity CI today - changes are
 manually smoke-tested.
 
@@ -84,7 +84,7 @@ Maintainers only. Each SDK has its own release cadence:
   `v-js/1.1.0`.
 - **Godot** - bump `version` in `addons/crux/plugin.cfg`, tag
   `v-godot/<semver>`, submit to Godot Asset Library.
-- **Unity** - bump `version` in `Packages/host.supercraft.sdk/package.json`,
+- **Unity** - bump `version` in `Packages/host.supercraft.crux/package.json`,
   tag `v-unity/<semver>`.
 - **Roblox** - bump `wally.toml`, tag `v-roblox/<semver>`, push to Wally.
 

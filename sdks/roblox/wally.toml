@@ -1,0 +1,16 @@
+[package]
+name = "supercraft/crux"
+description = "Crux game services backend for Roblox: versioned documents, seasonal leaderboards, economy, matchmaking, and server registry over HttpService."
+version = "2.0.0"
+license = "MIT"
+authors = ["Supercraft <contact@supercraft.host>"]
+registry = "https://github.com/UpliftGames/wally-index"
+
+# Server realm, not shared. Crux.lua holds a ServerToken and calls HttpService,
+# both of which are server-only in Roblox. Publishing this as `shared` would let
+# it be required from a LocalScript, where HttpService is unavailable and the
+# token would be handed to the client.
+realm = "server"
+
+exclude = ["**"]
+include = ["Crux.lua", "default.project.json", "wally.toml", "README.md", "LICENSE"]

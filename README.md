@@ -151,7 +151,7 @@ See [`sdks/godot/README.md`](sdks/godot/README.md).
 ### Unity - UPM via Git URL
 
 ```
-git+https://github.com/supercraft-host/crux.git?path=sdks/unity/Packages/host.supercraft.sdk
+git+https://github.com/supercraft-host/crux.git?path=sdks/unity/Packages/host.supercraft.crux
 ```
 
 ```csharp

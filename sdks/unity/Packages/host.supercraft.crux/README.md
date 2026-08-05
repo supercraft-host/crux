@@ -9,12 +9,12 @@ Add to your project's `Packages/manifest.json`:
 ```json
 {
   "dependencies": {
-    "host.supercraft.crux": "file:../../sdk-unity/Packages/host.supercraft.sdk"
+    "host.supercraft.crux": "file:../../sdks/unity/Packages/host.supercraft.crux"
   }
 }
 ```
 
-Or via **Package Manager → Add package from disk...** pointing at `host.supercraft.sdk/package.json`.
+Or via **Package Manager → Add package from disk...** pointing at `host.supercraft.crux/package.json`.
 
 ## Quick start - game client
 
