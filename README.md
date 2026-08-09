@@ -9,10 +9,10 @@ hosted, with a free tier. Dashboard and docs: https://crux.supercraft.host
 ## Install
 
 **From the Godot editor (recommended):** open the **AssetLib** tab, search **Crux**, Download, Install.
-Then **Project → Project Settings → Plugins → Crux → Enable**, and add it as an Autoload named `Crux`
-(**Project → Project Settings → Autoload →** `res://addons/crux/crux.gd`, node name `Crux`).
+Then **Project → Project Settings → Plugins → Crux → Enable**. That is the whole install —
+enabling the plugin registers the `Crux` autoload for you, so there is no manual autoload step.
 
-**Manual:** copy `addons/crux/` into your project's `addons/` folder, then enable and autoload as above.
+**Manual:** copy `addons/crux/` into your project's `addons/` folder, then enable the plugin as above.
 
 ## Your first leaderboard in 15 minutes
 

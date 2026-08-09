@@ -1,7 +1,11 @@
 ## Crux - Supercraft Game Services Backend SDK for Godot 4
 ##
-## Add as an Autoload (Project → Project Settings → Autoload) for global access,
-## or instantiate manually and add_child() it to a node in your scene.
+## Enabling the addon (Project → Project Settings → Plugins → Crux) registers
+## this script as an autoload named "Crux", so it is globally available with no
+## further setup. You can also instantiate it manually and add_child() it.
+##
+## NOTE: deliberately no `class_name`. An autoload and a global class cannot
+## share a name in Godot, and the autoload is the documented entry point.
 ##
 ## Usage (server mode - dedicated game server):
 ##   Crux.init_server("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>")
@@ -14,7 +18,6 @@
 ##   var auth = await Crux.login_anonymous()
 ##   var doc  = await Crux.get_player_document(auth.player_id, "inventory")
 
-class_name Crux
 extends Node
 
 # ── Configuration ─────────────────────────────────────────────────────────────
@@ -31,6 +34,10 @@ var player_id: String
 
 const MAX_RETRIES  := 3
 const BASE_BACKOFF := 1.0
+
+## Where the guest device id is kept. user:// is per-project and survives
+## relaunches, which is the entire point - see login_anonymous().
+const ANON_ID_PATH := "user://crux_anonymous_id.txt"
 
 
 func init_server(base_url: String, project_id: String, environment_id: String, server_token: String) -> void:
@@ -50,11 +57,62 @@ func init_player(base_url: String, project_id: String, environment_id: String, a
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
 ## Anonymous (guest) login. Returns {player_id, access_token, refresh_token, expires_in}.
+##
+## The device id is stored under user:// and reused automatically, so the same
+## install returns to the same player - and therefore the same saves - after a
+## relaunch. Pass an explicit anonymous_id only if your game already has its own
+## stable device identifier.
 func login_anonymous(anonymous_id: String = "") -> Dictionary:
-	# Persist and reuse anonymous_id to return to the same player across sessions.
+	# This used to mint "anon-<time>-<rand>" and store it NOWHERE, despite a
+	# comment telling the reader to persist it. Every relaunch therefore created
+	# a brand new player and silently orphaned the previous save - the flagship
+	# cloud-save flow failing at HTTP 200, with nothing in any log to show it.
 	if anonymous_id == "":
-		anonymous_id = "anon-%d-%d" % [Time.get_unix_time_from_system(), randi()]
-	return await _auth_request("/v1/auth/anonymous", {"anonymous_id": anonymous_id})
+		anonymous_id = _load_anonymous_id()
+
+	var body := {}
+	if anonymous_id != "":
+		body["anonymous_id"] = anonymous_id
+
+	var result := await _auth_request("/v1/auth/anonymous", body)
+
+	# The server mints an id when we send none and returns it so we can keep it;
+	# older servers return nothing, in which case we keep what we sent.
+	var issued := str(result.get("anonymous_id", ""))
+	if issued != "":
+		_store_anonymous_id(issued)
+	elif anonymous_id != "":
+		_store_anonymous_id(anonymous_id)
+
+	return result
+
+
+## Forget the stored device id. The next login_anonymous() starts a fresh guest
+## player - use this for a "sign out of guest account" or "reset progress"
+## action, never on normal startup.
+func clear_anonymous_id() -> void:
+	if FileAccess.file_exists(ANON_ID_PATH):
+		DirAccess.remove_absolute(ANON_ID_PATH)
+
+
+func _load_anonymous_id() -> String:
+	if not FileAccess.file_exists(ANON_ID_PATH):
+		return ""
+	var f := FileAccess.open(ANON_ID_PATH, FileAccess.READ)
+	if f == null:
+		return ""
+	var stored := f.get_as_text().strip_edges()
+	f.close()
+	return stored
+
+
+func _store_anonymous_id(value: String) -> void:
+	var f := FileAccess.open(ANON_ID_PATH, FileAccess.WRITE)
+	if f == null:
+		push_warning("Crux: could not write %s - this guest player will not be recoverable after a relaunch." % ANON_ID_PATH)
+		return
+	f.store_string(value)
+	f.close()
 
 
 ## Email + password login.
