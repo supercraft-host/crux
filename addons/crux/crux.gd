@@ -11,12 +11,18 @@
 ##   Crux.init_server("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<SERVER_TOKEN>")
 ##
 ## Usage (player mode - game client):
-##   Crux.init_player("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<API_KEY>")
+##   Crux.init_player("https://crux.supercraft.host", "<PROJECT_ID>", "<ENVIRONMENT_ID>", "<PUBLISHABLE_KEY>")
 ##
-## PROJECT_ID and ENVIRONMENT_ID are UUIDs; API_KEY / SERVER_TOKEN are the secret
-## strings issued on the Credentials page of your Crux dashboard.
-##   var auth = await Crux.login_anonymous()
-##   var doc  = await Crux.get_player_document(auth.player_id, "inventory")
+## PROJECT_ID and ENVIRONMENT_ID are UUIDs. init_player takes the publishable key;
+## init_server takes a secret server token. Never put a secret credential in a
+## shipped player build.
+##   await Crux.login_anonymous()
+##   var doc = await Crux.get_player_document("", "inventory")
+##
+## Every player-scoped call takes a player id first. Pass "" and the SDK uses the
+## player from the last login, so the id never has to be threaded through your
+## own code. Passing one explicitly still works and is required on a dedicated
+## server, which acts for players it did not log in as.
 
 extends Node
 
@@ -38,6 +44,11 @@ var _refresh_token: String
 
 var player_id: String
 
+## Why the last init_* call cannot be used, or "" when the SDK is usable. Kept
+## rather than just logged so every later call can repeat the real reason
+## instead of failing with a vaguer one. See _check_config().
+var _config_error: String
+
 const MAX_RETRIES  := 3
 const BASE_BACKOFF := 1.0
 
@@ -46,38 +57,44 @@ const BASE_BACKOFF := 1.0
 const ANON_ID_PATH := "user://crux_anonymous_id.txt"
 
 
-func init_server(base_url: String, project_id: String, environment_id: String, server_token: String) -> void:
+## Returns false, and says exactly what is wrong, when the values cannot work.
+func init_server(base_url: String, project_id: String, environment_id: String, server_token: String) -> bool:
 	_base_url     = base_url.rstrip("/")
 	_project_id   = project_id
 	_env_id       = environment_id
 	_server_token = server_token
+	return _check_config("init_server", base_url, project_id, environment_id, server_token, "server_token")
 
 
-func init_player(base_url: String, project_id: String, environment_id: String, api_key: String) -> void:
+## Returns false, and says exactly what is wrong, when the values cannot work.
+func init_player(base_url: String, project_id: String, environment_id: String, api_key: String) -> bool:
 	_base_url   = base_url.rstrip("/")
 	_project_id = project_id
 	_env_id     = environment_id
 	_api_key    = api_key
+	return _check_config("init_player", base_url, project_id, environment_id, api_key, "api_key")
 
 
 ## Configure the editor/CI Runtime deployment surface. The key must be a
 ## SECRET API key and must stay outside a shipped game binary.
-func init_runtime_control(base_url: String, project_id: String, environment_id: String, secret_api_key: String) -> void:
+func init_runtime_control(base_url: String, project_id: String, environment_id: String, secret_api_key: String) -> bool:
 	_base_url           = base_url.rstrip("/")
 	_project_id         = project_id
 	_env_id             = environment_id
 	_runtime_control_key = secret_api_key
+	return _check_config("init_runtime_control", base_url, project_id, environment_id, secret_api_key, "secret_api_key")
 
 
 ## Configure a running authoritative server with its session-scoped Runtime
 ## credential. This token is safe to use only for the matching session context
 ## and trusted result endpoints; it is not a project API key.
-func init_runtime_session(base_url: String, project_id: String, environment_id: String, session_id: String, session_token: String) -> void:
+func init_runtime_session(base_url: String, project_id: String, environment_id: String, session_id: String, session_token: String) -> bool:
 	_base_url              = base_url.rstrip("/")
 	_project_id            = project_id
 	_env_id                = environment_id
 	_runtime_session_id    = session_id
 	_runtime_session_token = session_token
+	return _check_config("init_runtime_session", base_url, project_id, environment_id, session_token, "session_token")
 
 
 ## Initialize the Runtime session API from the environment variables injected by
@@ -91,8 +108,87 @@ func init_runtime_session_from_environment(base_url: String = "https://crux.supe
 	if project.is_empty() or environment.is_empty() or session.is_empty() or token.is_empty():
 		push_error("Crux: Runtime session environment is incomplete")
 		return false
-	init_runtime_session(base_url, project, environment, session, token)
+	return init_runtime_session(base_url, project, environment, session, token)
+
+
+# ── Configuration guards ──────────────────────────────────────────────────────
+# A misconfigured client used to be invisible until the server answered, and the
+# server cannot see what the caller forgot. Unconfigured ids built
+# /v1/projects//environments//players//documents/<key> and came back 404, which
+# says nothing about the missing init_player(). A mistyped id came back 400
+# "invalid UUID". A call made before login came back 401 "invalid credentials",
+# which reads as a bad API key and sends the developer to rotate one.
+#
+# In September 2026 a developer integrating from Godot sent 84 requests in those
+# three shapes over two days, re-reading the credentials page between attempts,
+# and never wrote a single document. Every one of those requests was knowably
+# malformed before it left the machine.
+#
+# So the SDK now checks what it can see locally, names the call that is missing
+# or the value that is wrong, and does not send. The check runs at init time and
+# again at request time, because the developer is not always looking at the
+# console when _ready() runs.
+
+
+## True when the SDK holds a usable project and environment. False means the
+## last init_* call failed; it pushed an error saying which value was wrong.
+func is_configured() -> bool:
+	return _config_error.is_empty() and not _project_id.is_empty() and not _env_id.is_empty()
+
+
+func _check_config(caller: String, base_url: String, project_id: String, environment_id: String, credential: String, credential_name: String) -> bool:
+	var problems := PackedStringArray()
+	if base_url.strip_edges().is_empty():
+		problems.append("base_url is empty, it should be \"https://crux.supercraft.host\"")
+	problems.append_array(_id_problems("project_id", project_id, "Projects"))
+	problems.append_array(_id_problems("environment_id", environment_id, "Environments"))
+	if credential.strip_edges().is_empty():
+		problems.append("%s is empty" % credential_name)
+
+	if problems.is_empty():
+		_config_error = ""
+		return true
+	_config_error = "Crux: %s cannot be used - %s." % [caller, ", ".join(problems)]
+	push_error(_config_error)
+	return false
+
+
+## Both ids are dashboard UUIDs, and both were mistyped by one character in the
+## September 2026 case, so the message quotes the value and its length: that is
+## what makes a transcription slip visible without a second pair of eyes.
+func _id_problems(field: String, value: String, page: String) -> PackedStringArray:
+	if value.is_empty():
+		return PackedStringArray(["%s is empty, copy it from the %s page of the dashboard" % [field, page]])
+	if not _is_uuid(value):
+		return PackedStringArray(["%s \"%s\" is not a UUID (%d characters, a UUID has 36), copy it again from the %s page" % [field, value, value.length(), page]])
+	return PackedStringArray()
+
+
+func _is_uuid(value: String) -> bool:
+	if value.length() != 36:
+		return false
+	for i in 36:
+		var c := value[i]
+		if i == 8 or i == 13 or i == 18 or i == 23:
+			if c != "-":
+				return false
+		elif not c.is_valid_hex_number():
+			return false
 	return true
+
+
+## Resolve the player for a player-scoped call. An empty pid means "whoever last
+## logged in", which the login methods already store, so a game never has to
+## carry the id around itself. Returns "" when there is no such player, after
+## saying so - the caller must then not send the request.
+func _player(pid: String) -> String:
+	if not pid.is_empty():
+		return pid
+	if not player_id.is_empty():
+		return player_id
+	push_error("Crux: no player id. Call login_anonymous() (or another login) first, "
+		+ "or pass a player id explicitly - a dedicated server always has to.")
+	return ""
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -174,15 +270,23 @@ func refresh_token() -> Dictionary:
 	return await _auth_request("/v1/auth/refresh", {"refresh_token": _refresh_token})
 
 
-## Revoke the current session.
+## Revoke the current session. Logging out when nobody is logged in clears the
+## local state and makes no request, rather than spending a round trip on a 401.
 func logout() -> void:
-	await _request("POST", "/v1/auth/logout", {}, "Bearer " + _player_token)
+	if not _player_token.is_empty():
+		await _request("POST", "/v1/auth/logout", {}, "Bearer " + _player_token)
 	_player_token  = ""
 	_refresh_token = ""
 	player_id      = ""
 
 
 func _auth_request(path: String, body: Dictionary) -> Dictionary:
+	# Without a key the API answers 401 "invalid credentials", which reads as a
+	# WRONG key and sends the developer back to the credentials page to rotate a
+	# key that was never the problem.
+	if _api_key.is_empty():
+		push_error("Crux: no API key. Call init_player() with your publishable key before logging a player in.")
+		return {}
 	var result = await _request("POST", path, body, "ApiKey " + _api_key)
 	if result.has("access_token"):
 		_player_token  = result.get("access_token",  "")
@@ -192,44 +296,64 @@ func _auth_request(path: String, body: Dictionary) -> Dictionary:
 
 
 # ── Player Documents ──────────────────────────────────────────────────────────
+# pid may be "" in every call here: the SDK then uses the player from the last
+# login. See _player().
 
 ## Get a player document by key. Returns {key, value, version, updated_at}.
 ## value is a Godot Dictionary/Array (parsed from JSON).
 func get_player_document(pid: String, key: String) -> Dictionary:
-	return await _request("GET", _env("/players/%s/documents/%s" % [pid, key]), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("GET", _env("/players/%s/documents/%s" % [target, key]), {}, _runtime_auth())
 
 
 ## Write a player document. Pass optional version for optimistic locking.
 func set_player_document(pid: String, key: String, value: Variant, version: int = -1) -> Dictionary:
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
 	var body := {"value": value}
 	if version >= 0:
 		body["version"] = version
-	return await _request("PUT", _env("/players/%s/documents/%s" % [pid, key]), body, _runtime_auth())
+	return await _request("PUT", _env("/players/%s/documents/%s" % [target, key]), body, _runtime_auth())
 
 
 ## Apply document patch operations. operations is an Array of:
 ## {op="set"|"remove", path=["nested","field"], value=..., create_missing=true}
 func patch_player_document(pid: String, key: String, operations: Array, version: int = -1) -> Dictionary:
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
 	var body := {"operations": operations}
 	if version >= 0:
 		body["version"] = version
-	return await _request("PATCH", _env("/players/%s/documents/%s" % [pid, key]), body, _runtime_auth())
+	return await _request("PATCH", _env("/players/%s/documents/%s" % [target, key]), body, _runtime_auth())
 
 
 ## Delete a player document.
 func delete_player_document(pid: String, key: String) -> void:
-	await _request("DELETE", _env("/players/%s/documents/%s" % [pid, key]), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("DELETE", _env("/players/%s/documents/%s" % [target, key]), {}, _runtime_auth())
 
 
 ## Fetch multiple document keys in a single call. Returns Array of documents.
 func batch_get_player_documents(pid: String, keys: Array) -> Array:
-	return await _request_array("POST", _env("/players/%s/documents/batch-read" % pid), {"keys": keys}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return []
+	return await _request_array("POST", _env("/players/%s/documents/batch-read" % target), {"keys": keys}, _runtime_auth())
 
 
 ## Write multiple documents atomically.
 ## writes: Array of {key, value} or {key, value, version} Dictionaries.
 func batch_write_player_documents(pid: String, writes: Array) -> void:
-	await _request("POST", _env("/players/%s/documents/batch-write" % pid), {"items": writes}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("POST", _env("/players/%s/documents/batch-write" % target), {"items": writes}, _runtime_auth())
 
 
 # ── Project Documents ─────────────────────────────────────────────────────────
@@ -280,10 +404,13 @@ func batch_write_project_documents(documents: Array) -> Array:
 
 # ── Leaderboards ──────────────────────────────────────────────────────────────
 
-## Submit a score. metadata is an optional Dictionary.
+## Submit a score. metadata is an optional Dictionary. pid may be "".
 func submit_score(leaderboard_id: String, pid: String, score: float, metadata: Dictionary = {}) -> void:
+	var target := _player(pid)
+	if target.is_empty():
+		return
 	await _request("POST", _env("/leaderboards/%s/scores" % leaderboard_id),
-		{"player_id": pid, "score": score, "metadata": metadata}, _runtime_auth())
+		{"player_id": target, "score": score, "metadata": metadata}, _runtime_auth())
 
 
 ## Get the top N entries. Returns Array of {rank, player_id, score, metadata}.
@@ -293,13 +420,19 @@ func get_top(leaderboard_id: String, limit: int = 10) -> Array:
 
 ## Get a player's rank and score. Returns {rank, player_id, score} or empty dict if not ranked.
 func get_player_standing(leaderboard_id: String, pid: String) -> Dictionary:
-	return await _request("GET", _env("/leaderboards/%s/players/%s" % [leaderboard_id, pid]), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("GET", _env("/leaderboards/%s/players/%s" % [leaderboard_id, target]), {}, _runtime_auth())
 
 
 ## Get entries surrounding a player (radius entries above + below). Returns Array.
 func get_around_player(leaderboard_id: String, pid: String, radius: int = 3) -> Array:
+	var target := _player(pid)
+	if target.is_empty():
+		return []
 	return await _request_array("GET",
-		_env("/leaderboards/%s/players/%s/around?radius=%d" % [leaderboard_id, pid, radius]), {}, _runtime_auth())
+		_env("/leaderboards/%s/players/%s/around?radius=%d" % [leaderboard_id, target, radius]), {}, _runtime_auth())
 
 
 # ── Stats & Achievements ──────────────────────────────────────────────────────
@@ -310,26 +443,38 @@ func get_around_player(leaderboard_id: String, pid: String, radius: int = 3) -> 
 
 ## All of a player's stats: Array of {player_id, key, value, created_at, updated_at}.
 func list_player_stats(pid: String) -> Array:
-	return await _request_array("GET", _env("/players/%s/stats" % pid), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return []
+	return await _request_array("GET", _env("/players/%s/stats" % target), {}, _runtime_auth())
 
 
 ## One stat. A stat never written reads as value 0 rather than erroring -
 ## "no kills yet" and "0 kills" are the same fact.
 func get_player_stat(pid: String, key: String) -> Dictionary:
-	return await _request("GET", _env("/players/%s/stats/%s" % [pid, key]), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("GET", _env("/players/%s/stats/%s" % [target, key]), {}, _runtime_auth())
 
 
 ## Set a stat outright. Returns {stat, unlocked}, where unlocked lists ONLY the
 ## achievements this write earned - so you can grant rewards from it without
 ## double-awarding on a retry.
 func set_player_stat(pid: String, key: String, value: int) -> Dictionary:
-	return await _request("PUT", _env("/players/%s/stats/%s" % [pid, key]),
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("PUT", _env("/players/%s/stats/%s" % [target, key]),
 		{"value": value}, _server_auth())
 
 
 ## Add to a stat. delta may be negative. Same return shape as set_player_stat().
 func increment_player_stat(pid: String, key: String, delta: int) -> Dictionary:
-	return await _request("PUT", _env("/players/%s/stats/%s" % [pid, key]),
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("PUT", _env("/players/%s/stats/%s" % [target, key]),
 		{"value": delta, "increment": true}, _server_auth())
 
 
@@ -341,14 +486,20 @@ func list_achievements() -> Array:
 ## The whole catalogue annotated for one player: unlocked_at is null on the ones
 ## they have not earned, so a UI can show locked and unlocked together.
 func list_player_achievements(pid: String) -> Array:
-	return await _request_array("GET", _env("/players/%s/achievements" % pid), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return []
+	return await _request_array("GET", _env("/players/%s/achievements" % target), {}, _runtime_auth())
 
 
 ## Award an achievement outright, for the ones no counter can express.
 ## Returns {unlocked, achievement}; unlocked is false when the player already
 ## had it, so a retry cannot pay a reward twice.
 func unlock_achievement(pid: String, key: String) -> Dictionary:
-	return await _request("POST", _env("/players/%s/achievements/%s/unlock" % [pid, key]), {}, _server_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("POST", _env("/players/%s/achievements/%s/unlock" % [target, key]), {}, _server_auth())
 
 
 # ── Economy ───────────────────────────────────────────────────────────────────
@@ -356,14 +507,20 @@ func unlock_achievement(pid: String, key: String) -> Dictionary:
 ## Get a player's balances and inventory.
 ## Returns {player_id, balances: [{currency_id, currency_name, amount}], inventory: [...]}
 func get_player_economy(pid: String) -> Dictionary:
-	return await _request("GET", _env("/players/%s/economy" % pid), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("GET", _env("/players/%s/economy" % target), {}, _runtime_auth())
 
 
 ## Atomically adjust balances and/or inventory.
 ## balance_adjustments: [{currency_id, amount}]
 ## inventory_adjustments: [{item_id, quantity}]
 func adjust_economy(pid: String, balance_adjustments: Array = [], inventory_adjustments: Array = []) -> Dictionary:
-	return await _request("POST", _env("/players/%s/economy/adjust" % pid), {
+	var target := _player(pid)
+	if target.is_empty():
+		return {}
+	return await _request("POST", _env("/players/%s/economy/adjust" % target), {
 		"balance_adjustments":   balance_adjustments,
 		"inventory_adjustments": inventory_adjustments,
 	}, _runtime_auth())
@@ -385,42 +542,63 @@ func adjust_economy(pid: String, balance_adjustments: Array = [], inventory_adju
 ## List this player's friendships. Array of {FriendID, Status, CreatedAt, UpdatedAt},
 ## where Status is "pending" until the recipient accepts, then "accepted".
 func list_friends(pid: String) -> Array:
-	return await _request_array("GET", _env("/players/%s/social/friends" % pid), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return []
+	return await _request_array("GET", _env("/players/%s/social/friends" % target), {}, _runtime_auth())
 
 
 ## List friend requests sent TO this player. Array of {PlayerID, CreatedAt},
 ## where PlayerID is the sender.
 func list_pending_friend_requests(pid: String) -> Array:
-	return await _request_array("GET", _env("/players/%s/social/friends/requests" % pid), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return []
+	return await _request_array("GET", _env("/players/%s/social/friends/requests" % target), {}, _runtime_auth())
 
 
 ## Send a friend request. Rejected with 403 if the target has blocked this player.
 func send_friend_request(pid: String, friend_id: String) -> void:
-	await _request("POST", _env("/players/%s/social/friends/request" % pid),
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("POST", _env("/players/%s/social/friends/request" % target),
 		{"friend_id": friend_id}, _runtime_auth())
 
 
 ## Accept a request. friend_id is the player who SENT it.
 func accept_friend_request(pid: String, friend_id: String) -> void:
-	await _request("POST", _env("/players/%s/social/friends/accept" % pid),
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("POST", _env("/players/%s/social/friends/accept" % target),
 		{"friend_id": friend_id}, _runtime_auth())
 
 
 ## Remove a friend. Also withdraws a still-pending request, and succeeds even
 ## when there was no friendship.
 func remove_friend(pid: String, friend_id: String) -> void:
-	await _request("DELETE", _env("/players/%s/social/friends/%s" % [pid, friend_id]), {}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("DELETE", _env("/players/%s/social/friends/%s" % [target, friend_id]), {}, _runtime_auth())
 
 
 ## Block a player. Idempotent. A blocked player cannot send this player requests.
 func block_player(pid: String, target_id: String) -> void:
-	await _request("POST", _env("/players/%s/social/blocks" % pid),
+	var actor := _player(pid)
+	if actor.is_empty():
+		return
+	await _request("POST", _env("/players/%s/social/blocks" % actor),
 		{"target_id": target_id}, _runtime_auth())
 
 
 ## Unblock a player.
 func unblock_player(pid: String, target_id: String) -> void:
-	await _request("DELETE", _env("/players/%s/social/blocks/%s" % [pid, target_id]), {}, _runtime_auth())
+	var actor := _player(pid)
+	if actor.is_empty():
+		return
+	await _request("DELETE", _env("/players/%s/social/blocks/%s" % [actor, target_id]), {}, _runtime_auth())
 
 
 # ── Matchmaking ───────────────────────────────────────────────────────────────
@@ -434,7 +612,10 @@ func unblock_player(pid: String, target_id: String) -> void:
 ## PLAYER TOKEN ONLY, and pid is ignored: the server queues whoever the token
 ## identifies. A server token gets 401.
 func join_matchmaking(pid: String, game_mode: String, region: String = "global", runtime_build_id: String = "") -> void:
-	var body := {"player_id": pid, "game_mode": game_mode, "region": region}
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	var body := {"player_id": target, "game_mode": game_mode, "region": region}
 	if not runtime_build_id.is_empty():
 		body["runtime_build_id"] = runtime_build_id
 	await _request("POST", _env("/matchmaking/join"), body, _runtime_auth())
@@ -473,7 +654,10 @@ func complete_match(match_id: String) -> void:
 
 ## Leave the matchmaking queue.
 func leave_matchmaking(pid: String) -> void:
-	await _request("POST", _env("/matchmaking/leave"), {"player_id": pid}, _runtime_auth())
+	var target := _player(pid)
+	if target.is_empty():
+		return
+	await _request("POST", _env("/matchmaking/leave"), {"player_id": target}, _runtime_auth())
 
 
 # ── Crux Runtime ─────────────────────────────────────────────────────────────
@@ -671,7 +855,16 @@ func download_active_config_bundle() -> PackedByteArray:
 
 # ── HTTP internals ────────────────────────────────────────────────────────────
 
+## The environment-scoped path prefix, or "" when the SDK cannot build a valid
+## one. Callers pass the result straight to _send(), which refuses an empty path.
 func _env(suffix: String) -> String:
+	if not _config_error.is_empty():
+		push_error(_config_error)
+		return ""
+	if _project_id.is_empty() or _env_id.is_empty():
+		push_error("Crux: not configured. Call init_player() in a game client, "
+			+ "or init_server() on a dedicated server, before any other call.")
+		return ""
 	return "/v1/projects/%s/environments/%s%s" % [_project_id, _env_id, suffix]
 
 
@@ -712,6 +905,20 @@ func _runtime_session_auth() -> String:
 	return "RuntimeSession " + _runtime_session_token
 
 
+## Whether a request is worth putting on the wire at all. An empty path or an
+## empty Authorization header means a guard upstream already refused and
+## explained itself; a URL with an empty path segment is the same fault caught
+## one layer later, and is what produced /players//documents/<key>.
+func _can_send(method: String, path: String, auth_header: String) -> bool:
+	if path.is_empty() or auth_header.is_empty():
+		return false
+	if path.contains("//"):
+		push_error("Crux: refusing to send %s %s - it has an empty path segment, "
+			% [method, path] + "so a required id is missing.")
+		return false
+	return true
+
+
 func _build_query(params: Dictionary) -> String:
 	var parts := PackedStringArray()
 	for k in params:
@@ -728,9 +935,16 @@ func _build_query(params: Dictionary) -> String:
 # standings, server browser, batch reads), or {} for an empty body / transport
 # error / HTTP >= 400 (after logging). Callers pick the typed wrapper below.
 func _send(method: String, path: String, body: Dictionary, auth_header: String) -> Variant:
-	var http_method := _method_const(method)
-	var url         := _base_url + path
-	var headers     := PackedStringArray([
+	# _env() answers "" when the SDK is not configured, and the auth helpers
+	# answer "" when no credential fits the route. Both have already pushed the
+	# error that names the missing call. Sending anyway would bury it under the
+	# server's own 404 or 401, which is how the same misconfiguration used to
+	# cost days instead of one console line.
+	if not _can_send(method, path, auth_header):
+		return {}
+
+	var url     := _base_url + path
+	var headers := PackedStringArray([
 		"Authorization: " + auth_header,
 		"Content-Type: application/json",
 	])
@@ -740,21 +954,14 @@ func _send(method: String, path: String, body: Dictionary, auth_header: String) 
 
 	var backoff := BASE_BACKOFF
 	for attempt in range(MAX_RETRIES + 1):
-		var http := HTTPRequest.new()
-		add_child(http)
-		var err := http.request_raw(url, headers, http_method, body_bytes)
-		if err != OK:
-			http.queue_free()
-			push_error("Crux: HTTPRequest error %d on %s %s" % [err, method, path])
+		var response := await _perform(method, url, headers, body_bytes)
+		if response.is_empty():
 			return {}
-
-		var response = await http.request_completed
-		http.queue_free()
 
 		# response: [result, response_code, headers, body: PackedByteArray]
 		var response_code: int           = response[1]
 		var body_raw:      PackedByteArray = response[3]
-		var body_str:      String         = body_raw.get_string_from_utf8()
+		var body_str:      String          = body_raw.get_string_from_utf8()
 
 		if response_code in [429, 503]:
 			if attempt < MAX_RETRIES:
@@ -790,19 +997,15 @@ func _request(method: String, path: String, body: Dictionary, auth_header: Strin
 
 
 func _request_raw(method: String, path: String, body: PackedByteArray, content_type: String, auth_header: String) -> Dictionary:
+	if not _can_send(method, path, auth_header):
+		return {}
 	var headers := PackedStringArray([
 		"Authorization: " + auth_header,
 		"Content-Type: " + content_type,
 	])
-	var http := HTTPRequest.new()
-	add_child(http)
-	var err := http.request_raw(_base_url + path, headers, _method_const(method), body)
-	if err != OK:
-		http.queue_free()
-		push_error("Crux: HTTPRequest error %d on %s %s" % [err, method, path])
+	var response := await _perform(method, _base_url + path, headers, body)
+	if response.is_empty():
 		return {}
-	var response = await http.request_completed
-	http.queue_free()
 	var response_code: int = response[1]
 	var body_str: String = response[3].get_string_from_utf8()
 	if response_code >= 400:
@@ -825,19 +1028,33 @@ func _request_array(method: String, path: String, body: Dictionary, auth_header:
 
 
 func _request_bytes(path: String, auth_header: String) -> PackedByteArray:
-	var headers := PackedStringArray(["Authorization: " + auth_header])
-	var http    := HTTPRequest.new()
-	add_child(http)
-	var err := http.request_raw(_base_url + path, headers, HTTPClient.METHOD_GET, PackedByteArray())
-	if err != OK:
-		http.queue_free()
+	if not _can_send("GET", path, auth_header):
 		return PackedByteArray()
-	var response = await http.request_completed
-	http.queue_free()
+	var headers := PackedStringArray(["Authorization: " + auth_header])
+	var response := await _perform("GET", _base_url + path, headers, PackedByteArray())
+	if response.is_empty():
+		return PackedByteArray()
 	if response[1] >= 400:
 		push_error("Crux: HTTP %d downloading bundle" % response[1])
 		return PackedByteArray()
 	return response[3]
+
+
+## The one place the SDK touches the network, so the retry, guard and error
+## handling above can be exercised without a server: a test subclass overrides
+## this and answers with a canned [result, code, headers, body] tuple. Returns
+## [] when the request could not even be started.
+func _perform(method: String, url: String, headers: PackedStringArray, body: PackedByteArray) -> Array:
+	var http := HTTPRequest.new()
+	add_child(http)
+	var err := http.request_raw(url, headers, _method_const(method), body)
+	if err != OK:
+		http.queue_free()
+		push_error("Crux: HTTPRequest error %d on %s %s" % [err, method, url])
+		return []
+	var response: Array = await http.request_completed
+	http.queue_free()
+	return response
 
 
 func _parse_json(text: String) -> Dictionary:

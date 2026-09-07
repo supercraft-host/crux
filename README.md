@@ -1,11 +1,13 @@
 # Supercraft Crux - Godot 4 SDK
 
-GDScript addon for [Crux (Game Services Backend)](https://crux.supercraft.host). Requires Godot 4.1+.
+GDScript addon for [Crux (Game Services Backend)](https://crux.supercraft.host). Requires Godot 4.1+. The [Godot quickstart](https://crux.supercraft.host/sdk/?utm_source=github&utm_medium=repository&utm_campaign=sdk_distribution&utm_content=godot-sdk#godot) is the shortest path from install to a real player call.
 
 Migrating off PlayFab? The addon also ships a **PlayFab-shaped compatibility layer** that
 keeps your existing call sites working - see [PlayFab compatibility](#playfab-compatibility).
 
 ## Installation
+
+[Create a free project](https://crux.supercraft.host/signup/?utm_source=github&utm_medium=repository&utm_campaign=sdk_distribution&utm_content=godot-sdk), then:
 
 1. Copy the `addons/crux/` folder into your project's `addons/` directory.
 2. Enable the plugin: **Project → Project Settings → Plugins → Crux → Enable**.
@@ -16,7 +18,10 @@ keeps your existing call sites working - see [PlayFab compatibility](#playfab-co
 ```gdscript
 extends Node
 
-# Copy these four values from your Crux dashboard (https://crux.supercraft.host):
+# Copy these four values from your Crux dashboard (https://crux.supercraft.host).
+# The SDK page there prints this block with your own ids already filled in, so
+# paste it rather than retyping a UUID: one wrong character is a 400 on every
+# call, and the SDK cannot tell you which character it was.
 #   PROJECT_ID / ENV_ID  - UUIDs on the Projects + Environments pages
 #   API_KEY              - the PUBLISHABLE key from the Credentials page. Safe to
 #                          ship in a game client: it authenticates players and
@@ -25,22 +30,26 @@ extends Node
 #   LEADERBOARD_ID       - key OR UUID of a leaderboard you created (Leaderboards page)
 const PROJECT_ID     := "00000000-0000-0000-0000-000000000000"
 const ENV_ID         := "00000000-0000-0000-0000-000000000000"
-const API_KEY        := "<YOUR_API_KEY>"
+const API_KEY        := "<YOUR_PUBLISHABLE_KEY>"
 const LEADERBOARD_ID := "00000000-0000-0000-0000-000000000000"
 
 func _ready() -> void:
-    Crux.init_player("https://crux.supercraft.host", PROJECT_ID, ENV_ID, API_KEY)
+    # Returns false and names the value that is wrong, so a mistyped id stops
+    # here instead of coming back as a 404 from every call you make later.
+    if not Crux.init_player("https://crux.supercraft.host", PROJECT_ID, ENV_ID, API_KEY):
+        return
 
     # Log in anonymously (guest account, created on the fly)
     var auth = await Crux.login_anonymous()
-    var player_id: String = auth["player_id"]
-    print("Player: ", player_id)
+    print("Player: ", auth["player_id"])
 
-    # Save arbitrary data
-    await Crux.set_player_document(player_id, "settings", {"volume": 0.8, "lang": "en"})
+    # Save arbitrary data. "" as the player id means the player who just logged
+    # in, so the id never has to be threaded through your own code. Pass one
+    # explicitly when you act for another player, as a dedicated server does.
+    await Crux.set_player_document("", "settings", {"volume": 0.8, "lang": "en"})
 
     # Submit a score. Leaderboards are addressed by UUID or by the key you gave them.
-    await Crux.submit_score(LEADERBOARD_ID, player_id, 4200.0)
+    await Crux.submit_score(LEADERBOARD_ID, "", 4200.0)
 
     # Get the top 10
     var entries = await Crux.get_top(LEADERBOARD_ID, 10)
@@ -89,11 +98,16 @@ func _notification(what: int) -> void:
 
 ## API reference
 
+Every `player_id` below may be `""`, which means the player from the last login.
+Pass one explicitly to act for a different player, which is what a dedicated
+server does. With neither, the call prints what is missing and makes no request.
+
 ### Init
 | Call | Description |
 |------|-------------|
-| `Crux.init_server(url, project_id, env_id, server_token)` | Server-side mode |
-| `Crux.init_player(url, project_id, env_id, api_key)` | Client-side mode |
+| `Crux.init_server(url, project_id, env_id, server_token)` | Server-side mode. Returns `false` on an unusable value |
+| `Crux.init_player(url, project_id, env_id, api_key)` | Client-side mode. Returns `false` on an unusable value |
+| `Crux.is_configured()` | Whether the last init call left the SDK usable |
 
 ### Auth
 | Call | Description |
@@ -115,7 +129,7 @@ func _notification(what: int) -> void:
 | `await Crux.batch_write_player_documents(player_id, writes[])` | Write multiple keys atomically |
 
 ### Project Documents
-Shared by every player in the environment - server capacity, event flags, drop tables, seasonal switches. Reading needs any authenticated caller; **writing needs an API key or a server token**, so a game client cannot rewrite the rules it is handed.
+Shared by every player in the environment - server capacity, event flags, drop tables, seasonal switches. Reading needs any authenticated caller; **writing needs a secret API key or a server token**, so a game client cannot rewrite the rules it is handed.
 
 | Call | Description |
 |------|-------------|
